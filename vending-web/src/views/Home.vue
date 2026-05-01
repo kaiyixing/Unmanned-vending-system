@@ -49,6 +49,12 @@
           <h2>附近货柜</h2>
           <p class="lead text-muted">选择距离您最近的智能货柜，开启便捷购物体验</p>
         </div>
+        <div class="mb-4" style="max-width: 300px; margin: 0 auto;">
+          <select class="form-clay" v-model="selectedCity" @change="fetchCabinets">
+            <option value="">全部城市</option>
+            <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
+          </select>
+        </div>
         <div v-loading="loading">
           <div class="grid-3" v-if="cabinets.length > 0">
             <CabinetCard
@@ -129,11 +135,20 @@ const router = useRouter()
 const cabinets = ref([])
 const loading = ref(false)
 const cabinetsRef = ref()
+const selectedCity = ref('')
+const cities = ref(['深圳'])
 
 async function fetchCabinets() {
   loading.value = true
   try {
-    cabinets.value = await getCabinetList()
+    const data = await getCabinetList(selectedCity.value)
+    cabinets.value = data.records || data || []
+    if (cities.value.length === 1) {
+      const uniqueCities = [...new Set(cabinets.value.map(c => c.city).filter(Boolean))]
+      if (uniqueCities.length > 0) {
+        cities.value = uniqueCities
+      }
+    }
   } catch (e) {
     ElMessage.error('获取货柜列表失败')
   } finally {

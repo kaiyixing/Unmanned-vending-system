@@ -1,7 +1,11 @@
 import request from './request'
 
-export function getCabinetList(params) {
-  return request.get('/cabinet/list', { params }).then(res => res.data.records || [])
+export function getCabinetList(city) {
+  const params = {}
+  if (city) {
+    params.city = city
+  }
+  return request.get('/cabinet/list', { params }).then(res => res.data)
 }
 
 export function getCabinetById(id) {
