@@ -14,8 +14,8 @@ export const useCartStore = defineStore('cart', () => {
     items.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
   )
 
-  function addToCart(product, cabinetId, cabinetName) {
-    if (cabinetId.value && cabinetId.value !== cabinetId) {
+  function addToCart(product, newCabinetId, newCabinetName) {
+    if (cabinetId.value && cabinetId.value !== newCabinetId) {
       return false
     }
     const existing = items.value.find(item => item.productId === product.productId)
@@ -33,8 +33,8 @@ export const useCartStore = defineStore('cart', () => {
         stock: product.stock || 99
       })
     }
-    cabinetId.value = cabinetId
-    cabinetName.value = cabinetName
+    cabinetId.value = newCabinetId
+    cabinetName.value = newCabinetName
     saveCart()
     return true
   }

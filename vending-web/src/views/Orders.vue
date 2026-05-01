@@ -67,6 +67,7 @@ const statusOptions = [
   { value: 1, label: '已支付' },
   { value: 2, label: '已完成' },
   { value: 3, label: '已取消' },
+  { value: 4, label: '退款中' },
   { value: 5, label: '已退款' }
 ]
 

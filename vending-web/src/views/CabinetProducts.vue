@@ -96,7 +96,7 @@ async function fetchData() {
 function handleAddToCart(product) {
   const success = cartStore.addToCart(product, Number(cabinetId), cabinetName.value)
   if (!success) {
-    ElMessage.warning(cartStore.cabinetId && cartStore.cabinetId !== Number(cabinetId)
+    ElMessage.warning(cartStore.cabinetId && cartStore.cabinetId.value !== Number(cabinetId)
       ? '请先清空当前货柜的购物车'
       : '库存不足')
   } else {

@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
@@ -92,20 +92,34 @@ const registerRules = {
 
 async function handleLogin() {
   await loginFormRef.value.validate()
-  const res = await loginApi(loginForm)
-  userStore.setToken(res.data.token)
-  userStore.setUserInfo(res.data)
-  ElMessage.success('登录成功')
-  router.push('/')
+  try {
+    const res = await loginApi(loginForm)
+    if (res.data && res.data.token) {
+      userStore.setToken(res.data.token)
+      userStore.setUserInfo(res.data)
+      ElMessage.success('登录成功')
+      window.location.href = '/#/'
+    } else {
+      ElMessage.error('登录失败：未获取到有效响应')
+    }
+  } catch (e) {
+    ElMessage.error(e.message || '登录失败')
+  }
 }
 
 async function handleRegister() {
-  await registerFormRef.value.validate()
-  await registerApi(registerForm)
-  ElMessage.success('注册成功，请登录')
-  activeTab.value = 'login'
-  loginForm.username = registerForm.username
-  loginForm.password = ''
+  try {
+    await registerFormRef.value.validate()
+    await registerApi(registerForm)
+    ElMessage.success('注册成功，请登录')
+    activeTab.value = 'login'
+    loginForm.username = registerForm.username
+    loginForm.password = ''
+  } catch (e) {
+    if (e.message) {
+      ElMessage.error(e.message)
+    }
+  }
 }
 </script>
 

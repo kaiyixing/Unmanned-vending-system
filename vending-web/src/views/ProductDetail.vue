@@ -23,10 +23,16 @@
                 <span class="qty-num">{{ qty }}</span>
                 <button class="btn-clay btn-sm" @click="qty = Math.min(product.stock, qty + 1)">+</button>
               </div>
-              <button class="btn-clay btn-primary btn-lg" @click="handleAddToCart" :disabled="product.stock === 0">
+              <button v-if="cabinetId" class="btn-clay btn-primary btn-lg" @click="handleAddToCart" :disabled="product.stock === 0">
                 加入购物车
               </button>
+              <button v-else class="btn-clay btn-primary btn-lg" @click="$router.back()">
+                返回货柜选购
+              </button>
             </div>
+            <p v-if="!cabinetId" class="text-muted mt-2" style="font-size: 0.9rem;">
+              * 请从货柜商品列表页面添加商品到购物车
+            </p>
           </div>
         </div>
       </div>
@@ -36,7 +42,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ArrowLeft, ShoppingBag } from '@element-plus/icons-vue'
 import NavBar from '@/components/NavBar.vue'
@@ -44,10 +50,12 @@ import { useCartStore } from '@/stores/cart'
 import { getProductById } from '@/api/product'
 
 const route = useRoute()
+const router = useRouter()
 const cartStore = useCartStore()
 const product = ref(null)
 const loading = ref(false)
 const qty = ref(1)
+const cabinetId = ref(route.query.cabinetId ? Number(route.query.cabinetId) : null)
 
 async function fetchData() {
   loading.value = true
@@ -63,8 +71,12 @@ async function fetchData() {
 }
 
 function handleAddToCart() {
+  if (!cabinetId.value) {
+    ElMessage.warning('请返回货柜页面添加商品')
+    return
+  }
   for (let i = 0; i < qty.value; i++) {
-    cartStore.addToCart(product.value, product.value.cabinetId, product.value.cabinetName)
+    cartStore.addToCart(product.value, cabinetId.value, route.query.cabinetName || '')
   }
   ElMessage.success(`已添加 ${qty.value} 件到购物车`)
 }

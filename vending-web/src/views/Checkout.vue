@@ -89,8 +89,15 @@ async function handlePay() {
       quantity: item.quantity
     }))
 
+    const cabinetIdValue = cartStore.cabinetId.value
+    if (!cabinetIdValue) {
+      ElMessage.error('购物车中缺少货柜信息，请重新选择商品')
+      loading.value = false
+      return
+    }
+
     const orderRes = await createOrder({
-      cabinetId: cartStore.cabinetId,
+      cabinetId: cabinetIdValue,
       items: orderItems
     })
 

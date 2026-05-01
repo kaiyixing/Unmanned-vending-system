@@ -73,25 +73,25 @@
         <div class="grid-4">
           <div class="clay-box step-card">
             <div class="step-num">1</div>
-            <div class="step-icon"><el-icon :size="32"><User /></el-icon></div>
+            <div class="step-icon">📱</div>
             <h4>登录注册</h4>
             <p class="text-muted mb-0">使用账号登录或注册新账号</p>
           </div>
           <div class="clay-box step-card">
             <div class="step-num">2</div>
-            <div class="step-icon"><el-icon :size="32"><Shop /></el-icon></div>
+            <div class="step-icon">🏪</div>
             <h4>选择货柜</h4>
             <p class="text-muted mb-0">浏览附近货柜，选择商品加入购物车</p>
           </div>
           <div class="clay-box step-card">
             <div class="step-num">3</div>
-            <div class="step-icon"><el-icon :size="32"><CreditCard /></el-icon></div>
+            <div class="step-icon">💰</div>
             <h4>在线支付</h4>
             <p class="text-muted mb-0">使用微信或支付宝完成支付</p>
           </div>
           <div class="clay-box step-card">
             <div class="step-num">4</div>
-            <div class="step-icon"><el-icon :size="32"><QrCode /></el-icon></div>
+            <div class="step-icon">📦</div>
             <h4>取货码取货</h4>
             <p class="text-muted mb-0">获取取货码，到指定货柜取货</p>
           </div>
@@ -120,7 +120,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { User, Shop, CreditCard, QrCode } from '@element-plus/icons-vue'
 import NavBar from '@/components/NavBar.vue'
 import CabinetCard from '@/components/CabinetCard.vue'
 import { getCabinetList } from '@/api/cabinet'
