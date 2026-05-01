@@ -1,6 +1,7 @@
 :root {
   --admin-primary: #A2C2E8;
   --admin-primary-dark: #8eb0d3;
+  --admin-primary-light: #b6d4fb;
   --admin-bg: #F4F1EE;
   --admin-text: #4D423C;
   --admin-white: #FFFFFF;
@@ -8,6 +9,19 @@
   --admin-header-height: 60px;
   --admin-border: #e8e3de;
   --shadow-clay: 5px 5px 15px #d1ccc7, -5px -5px 15px #FFFFFF;
+  --shadow-clay-inset: inset 3px 3px 5px rgba(209, 204, 199, 0.5), inset -3px -3px 5px #FFFFFF;
+  --shadow-clay-deep: 10px 10px 20px #d1ccc7, -10px -10px 20px #FFFFFF;
+  --color-background: #F4F1EE;
+  --color-text: #4D423C;
+  --color-primary: #A2C2E8;
+  --color-primary-dark: #8eb0d3;
+  --color-primary-light: #b6d4fb;
+  --color-secondary: #FFCBA4;
+  --color-accent: #BEE8D2;
+  --color-white: #FFFFFF;
+  --color-dark-soft: #d1ccc7;
+  --border-radius-soft: 20px;
+  --transition-squish: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

@@ -98,7 +98,7 @@ async function handleLogin() {
       userStore.setToken(res.data.token)
       userStore.setUserInfo(res.data)
       ElMessage.success('登录成功')
-      window.location.href = '/#/'
+      window.location.href = '/'
     } else {
       ElMessage.error('登录失败：未获取到有效响应')
     }

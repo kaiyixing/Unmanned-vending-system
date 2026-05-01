@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-login-page">
+  <div class="login-page">
     <div class="login-blobs">
       <div class="blob blob-1"></div>
       <div class="blob blob-2"></div>
@@ -11,14 +11,14 @@
           <h1>智能货柜</h1>
           <p>管理后台</p>
         </div>
-        <el-form :model="form" :rules="rules" ref="formRef">
+        <el-form :model="form" :rules="rules" ref="formRef" @submit.prevent="handleLogin">
           <div class="mb-3">
             <input class="form-clay" v-model="form.username" placeholder="请输入用户名" />
           </div>
           <div class="mb-4">
             <input class="form-clay" v-model="form.password" type="password" placeholder="请输入密码" />
           </div>
-          <button class="btn-clay btn-primary w-100" type="button" @click="handleLogin" :disabled="loading">
+          <button class="btn-clay btn-primary w-100" type="submit" :disabled="loading">
             {{ loading ? '登录中...' : '登录' }}
           </button>
         </el-form>
@@ -79,14 +79,13 @@ function goHome() {
 </script>
 
 <style scoped>
-.admin-login-page {
+.login-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background-color: var(--admin-bg, #F4F1EE);
 }
 
 .login-blobs {
@@ -104,7 +103,7 @@ function goHome() {
 .blob-1 {
   width: 300px;
   height: 300px;
-  background-color: var(--admin-primary, #A2C2E8);
+  background-color: var(--color-primary);
   top: 10%;
   left: 5%;
   border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
@@ -113,7 +112,7 @@ function goHome() {
 .blob-2 {
   width: 400px;
   height: 400px;
-  background-color: #FFCBA4;
+  background-color: var(--color-secondary);
   bottom: 5%;
   right: 10%;
   border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
@@ -123,7 +122,7 @@ function goHome() {
 .blob-3 {
   width: 250px;
   height: 250px;
-  background-color: #BEE8D2;
+  background-color: var(--color-accent);
   top: 20%;
   right: 25%;
   border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
@@ -145,7 +144,6 @@ function goHome() {
 
 .login-card {
   padding: 40px;
-  background: var(--admin-bg, #F4F1EE);
 }
 
 .login-header {
@@ -154,9 +152,8 @@ function goHome() {
 }
 
 .login-header h1 {
-  font-size: 1.8rem;
+  font-size: 2rem;
   margin-bottom: 8px;
-  color: var(--admin-text, #4D423C);
 }
 
 .login-header p {
@@ -165,61 +162,6 @@ function goHome() {
 }
 
 .w-100 { width: 100%; }
-
-.form-clay {
-  width: 100%;
-  padding: 14px 18px;
-  background-color: var(--admin-bg, #F4F1EE);
-  border: none;
-  border-radius: 20px;
-  box-shadow: inset 3px 3px 5px rgba(209, 204, 199, 0.5), inset -3px -3px 5px #FFFFFF;
-  color: var(--admin-text, #4D423C);
-  font-size: 1rem;
-  font-family: 'Nunito', sans-serif;
-  font-weight: 600;
-  transition: all 0.3s ease-in-out;
-}
-
-.form-clay:focus {
-  outline: none;
-  box-shadow: inset 5px 5px 8px rgba(209, 204, 199, 0.7), inset -5px -5px 8px #FFFFFF;
-}
-
-.form-clay::placeholder {
-  color: #a8a098;
-}
-
-.btn-clay {
-  padding: 12px 30px;
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--admin-text, #4D423C);
-  background-color: var(--admin-bg, #F4F1EE);
-  border: none;
-  border-radius: 20px;
-  box-shadow: 5px 5px 15px #d1ccc7, -5px -5px 15px #FFFFFF;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-clay:hover:not(:disabled) {
-  transform: scale(0.97);
-  box-shadow: 10px 10px 20px #d1ccc7, -10px -10px 20px #FFFFFF;
-}
-
-.btn-clay.btn-primary {
-  background-color: var(--admin-primary, #A2C2E8);
-  box-shadow: 5px 5px 15px var(--admin-primary-dark, #8eb0d3), -5px -5px 15px var(--admin-primary-light, #b6d4fb);
-  color: #FFFFFF;
-}
-
-.btn-clay:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
 
 .back-link {
   text-align: center;
@@ -230,11 +172,11 @@ function goHome() {
   color: #8a7e74;
   text-decoration: none;
   font-size: 0.9rem;
-  transition: color 0.3s;
+  transition: var(--transition-squish);
 }
 
 .back-link a:hover {
-  color: var(--admin-primary, #A2C2E8);
+  color: var(--color-primary);
 }
 
 @media (max-width: 480px) {

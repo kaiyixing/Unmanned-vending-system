@@ -1,8 +1,6 @@
 package com.vending.module.cabinet.service.impl;
 
-========== Bcrypt Hash for 123456 ==========
-$2a$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-============================================import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.vending.module.cabinet.entity.Cabinet;
 import com.vending.module.cabinet.mapper.CabinetMapper;
