@@ -11,12 +11,14 @@ import com.vending.module.user.entity.User;
 import com.vending.module.user.mapper.UserMapper;
 import com.vending.module.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
@@ -26,7 +28,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public void register(RegisterRequest request) {
+        log.info("开始注册用户: username={}, phone={}", request.getUsername(), request.getPhone());
+        
         if (this.lambdaQuery().eq(User::getUsername, request.getUsername()).exists()) {
+            log.warn("用户名已存在: {}", request.getUsername());
             throw new BusinessException(ResultCode.USER_ALREADY_EXISTS);
         }
 
@@ -37,7 +42,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setRole(0);
         user.setStatus(1);
 
+        log.info("保存用户到数据库: {}", user);
         this.save(user);
+        log.info("用户注册成功: userId={}", user.getUserId());
     }
 
     @Override
