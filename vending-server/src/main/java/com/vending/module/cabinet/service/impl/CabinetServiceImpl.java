@@ -1,5 +1,6 @@
 package com.vending.module.cabinet.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.vending.module.cabinet.entity.Cabinet;
 import com.vending.module.cabinet.mapper.CabinetMapper;
@@ -26,7 +27,7 @@ public class CabinetServiceImpl extends ServiceImpl<CabinetMapper, Cabinet> impl
     @Override
     public List<Map<String, Object>> getCabinetProducts(Long cabinetId) {
         List<Inventory> inventories = inventoryMapper.selectList(
-                inventoryMapper.lambdaQuery().eq(Inventory::getCabinetId, cabinetId).getWrapper());
+                Wrappers.<Inventory>lambdaQuery().eq(Inventory::getCabinetId, cabinetId));
 
         List<Map<String, Object>> result = new ArrayList<>();
         for (Inventory inv : inventories) {
