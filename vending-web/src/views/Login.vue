@@ -115,6 +115,11 @@ async function handleRegister() {
     activeTab.value = 'login'
     loginForm.username = registerForm.username
     loginForm.password = ''
+    // 清空注册表单
+    registerForm.username = ''
+    registerForm.phone = ''
+    registerForm.password = ''
+    registerForm.confirmPassword = ''
   } catch (e) {
     if (e.message) {
       ElMessage.error(e.message)
