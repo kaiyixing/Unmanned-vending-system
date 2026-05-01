@@ -16,13 +16,18 @@ export const useCartStore = defineStore('cart', () => {
 
   function addToCart(product, newCabinetId, newCabinetName) {
     if (cabinetId.value && cabinetId.value !== newCabinetId) {
-      return false
+      return { success: false, reason: 'cabinet_conflict' }
     }
     const existing = items.value.find(item => item.productId === product.productId)
     if (existing) {
-      if (existing.quantity >= existing.stock) return false
+      if (existing.quantity >= existing.stock) {
+        return { success: false, reason: 'out_of_stock' }
+      }
       existing.quantity++
     } else {
+      if (product.stock <= 0) {
+        return { success: false, reason: 'out_of_stock' }
+      }
       items.value.push({
         productId: product.productId,
         name: product.name,
@@ -36,7 +41,7 @@ export const useCartStore = defineStore('cart', () => {
     cabinetId.value = newCabinetId
     cabinetName.value = newCabinetName
     saveCart()
-    return true
+    return { success: true }
   }
 
   function removeFromCart(productId) {
@@ -52,11 +57,16 @@ export const useCartStore = defineStore('cart', () => {
     if (item) {
       if (quantity <= 0) {
         removeFromCart(productId)
+        return { success: true }
+      } else if (quantity > item.stock) {
+        return { success: false, reason: 'out_of_stock' }
       } else {
-        item.quantity = Math.min(quantity, item.stock)
+        item.quantity = quantity
         saveCart()
+        return { success: true }
       }
     }
+    return { success: false }
   }
 
   function clearCart() {

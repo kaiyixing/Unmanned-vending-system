@@ -49,7 +49,7 @@
           <h2>附近货柜</h2>
           <p class="lead text-muted">选择距离您最近的智能货柜，开启便捷购物体验</p>
         </div>
-        <div class="mb-4" style="max-width: 300px; margin: 0 auto;">
+        <div class="city-selector mb-5" style="max-width: 300px; margin: 0 auto;">
           <select class="form-clay" v-model="selectedCity" @change="fetchCabinets">
             <option value="">全部城市</option>
             <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
@@ -172,6 +172,10 @@ onMounted(fetchCabinets)
 </script>
 
 <style scoped>
+.city-selector {
+  margin-bottom: 32px !important;
+}
+
 .hero-section {
   padding-top: 140px;
   min-height: 70vh;

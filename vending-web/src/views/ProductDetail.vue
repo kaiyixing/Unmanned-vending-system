@@ -75,10 +75,30 @@ function handleAddToCart() {
     ElMessage.warning('请返回货柜页面添加商品')
     return
   }
+  let addedCount = 0
+  let hasConflict = false
+  let hasOutOfStock = false
+  
   for (let i = 0; i < qty.value; i++) {
-    cartStore.addToCart(product.value, cabinetId.value, route.query.cabinetName || '')
+    const result = cartStore.addToCart(product.value, cabinetId.value, route.query.cabinetName || '')
+    if (result.success) {
+      addedCount++
+    } else if (result.reason === 'cabinet_conflict') {
+      hasConflict = true
+      break
+    } else if (result.reason === 'out_of_stock') {
+      hasOutOfStock = true
+      break
+    }
   }
-  ElMessage.success(`已添加 ${qty.value} 件到购物车`)
+  
+  if (hasConflict) {
+    ElMessage.warning('请先清空当前货柜的购物车')
+  } else if (hasOutOfStock) {
+    ElMessage.warning('库存不足')
+  } else if (addedCount > 0) {
+    ElMessage.success(`已添加 ${addedCount} 件到购物车`)
+  }
 }
 
 onMounted(fetchData)

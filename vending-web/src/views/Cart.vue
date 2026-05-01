@@ -22,9 +22,9 @@
               </div>
               <div class="item-actions">
                 <div class="quantity-ctrl">
-                  <button class="btn-clay btn-sm" @click="cartStore.updateQuantity(item.productId, item.quantity - 1)">-</button>
+                  <button class="btn-clay btn-sm" @click="handleUpdateQuantity(item, item.quantity - 1)">-</button>
                   <span class="qty-num">{{ item.quantity }}</span>
-                  <button class="btn-clay btn-sm" @click="cartStore.updateQuantity(item.productId, item.quantity + 1)">+</button>
+                  <button class="btn-clay btn-sm" @click="handleUpdateQuantity(item, item.quantity + 1)">+</button>
                 </div>
                 <div class="item-subtotal">¥{{ (item.price * item.quantity).toFixed(2) }}</div>
                 <button class="btn-clay btn-sm" style="color: #c0392b;" @click="cartStore.removeFromCart(item.productId)">
@@ -52,11 +52,19 @@
 </template>
 
 <script setup>
+import { ElMessage } from 'element-plus'
 import { ShoppingBag, Delete } from '@element-plus/icons-vue'
 import NavBar from '@/components/NavBar.vue'
 import { useCartStore } from '@/stores/cart'
 
 const cartStore = useCartStore()
+
+function handleUpdateQuantity(item, newQuantity) {
+  const result = cartStore.updateQuantity(item.productId, newQuantity)
+  if (!result.success && result.reason === 'out_of_stock') {
+    ElMessage.warning('库存不足')
+  }
+}
 </script>
 
 <style scoped>

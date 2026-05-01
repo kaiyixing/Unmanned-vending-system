@@ -79,7 +79,7 @@ async function fetchData() {
       getCabinetProducts(cabinetId)
     ])
     cabinetName.value = cabRes.data?.name || ''
-    cabinetAddress.value = `${cabRes.data?.city || ''}${cabRes.data?.address || ''}`
+    cabinetAddress.value = `${cabRes.data?.city || ''}  ${cabRes.data?.address || ''}`
     products.value = (prodRes.data || []).map(p => ({
       ...p.product,
       stock: p.stock || 0
@@ -94,11 +94,13 @@ async function fetchData() {
 }
 
 function handleAddToCart(product) {
-  const success = cartStore.addToCart(product, Number(cabinetId), cabinetName.value)
-  if (!success) {
-    ElMessage.warning(cartStore.cabinetId && cartStore.cabinetId.value !== Number(cabinetId)
-      ? '请先清空当前货柜的购物车'
-      : '库存不足')
+  const result = cartStore.addToCart(product, Number(cabinetId), cabinetName)
+  if (!result.success) {
+    if (result.reason === 'cabinet_conflict') {
+      ElMessage.warning('请先清空当前货柜的购物车')
+    } else if (result.reason === 'out_of_stock') {
+      ElMessage.warning('库存不足')
+    }
   } else {
     ElMessage.success('已加入购物车')
   }

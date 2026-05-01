@@ -89,7 +89,7 @@ async function handlePay() {
       quantity: item.quantity
     }))
 
-    const cabinetIdValue = cartStore.cabinetId.value
+    const cabinetIdValue = cartStore.cabinetId
     if (!cabinetIdValue) {
       ElMessage.error('购物车中缺少货柜信息，请重新选择商品')
       loading.value = false

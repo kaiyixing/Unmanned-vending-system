@@ -5,7 +5,7 @@
     </div>
     <div class="cabinet-info">
       <h4>{{ cabinet.name }}</h4>
-      <p class="address"><el-icon><Location /></el-icon> {{ cabinet.city }}{{ cabinet.address }}</p>
+      <p class="address"><el-icon><Location /></el-icon> {{ cabinet.city }}&nbsp;&nbsp;{{ cabinet.address }}</p>
       <div class="status-row">
         <span :class="['badge-clay', statusClass]">{{ statusText }}</span>
         <small class="text-muted">{{ cabinet.cabinetCode }}</small>
