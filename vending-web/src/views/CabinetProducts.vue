@@ -81,8 +81,8 @@ async function fetchData() {
     cabinetName.value = cabRes.data?.name || ''
     cabinetAddress.value = `${cabRes.data?.city || ''}${cabRes.data?.address || ''}`
     products.value = (prodRes.data || []).map(p => ({
-      ...p,
-      stock: p.inventory?.quantity || 0
+      ...p.product,
+      stock: p.stock || 0
     }))
     const cats = [...new Set(products.value.map(p => p.category))]
     categories.value = ['全部', ...cats]

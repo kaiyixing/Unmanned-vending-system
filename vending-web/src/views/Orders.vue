@@ -90,9 +90,12 @@ function getStatusClass(status) {
 async function fetchOrders() {
   loading.value = true
   try {
-    const params = statusFilter.value >= 0 ? { status: statusFilter.value } : {}
-    const res = await getUserOrders(params)
-    orders.value = res.data || []
+    const res = await getUserOrders({ page: 1, size: 100 })
+    let list = res.data?.records || []
+    if (statusFilter.value >= 0) {
+      list = list.filter(o => o.status === statusFilter.value)
+    }
+    orders.value = list
   } catch (e) {
     ElMessage.error('获取订单列表失败')
   } finally {
@@ -100,8 +103,13 @@ async function fetchOrders() {
   }
 }
 
-function goPay(order) {
-  router.push(`/pickup-code/${order.orderId}`)
+async function goPay(order) {
+  try {
+    await ElMessageBox.confirm('确认支付该订单？', '提示')
+    await import('@/api/payment').then(m => m.payOrder(order.orderId, 'mock'))
+    ElMessage.success('支付成功')
+    fetchOrders()
+  } catch (e) {}
 }
 
 async function cancelOrderHandler(order) {
@@ -121,7 +129,7 @@ async function applyRefund(order) {
       inputPattern: /.+/,
       inputErrorMessage: '退款原因不能为空'
     })
-    await applyRefundApi(order.orderId, { reason: value })
+    await applyRefundApi(order.orderId, value)
     ElMessage.success('退款申请已提交')
     fetchOrders()
   } catch (e) {}

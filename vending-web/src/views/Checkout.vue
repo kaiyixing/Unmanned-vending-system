@@ -97,7 +97,7 @@ async function handlePay() {
     const orderId = orderRes.data.orderId
 
     // 2. Pay
-    await payOrder({ orderId, payChannel: payChannel.value })
+    await payOrder(orderId, payChannel.value)
 
     ElMessage.success('支付成功')
     cartStore.clearCart()
