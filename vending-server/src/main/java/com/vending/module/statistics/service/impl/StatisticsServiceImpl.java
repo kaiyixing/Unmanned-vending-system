@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -50,7 +51,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         vo.setTodaySales(totalSales);
 
         if (!orders.isEmpty()) {
-            vo.setAvgOrderAmount(totalSales.divide(BigDecimal.valueOf(orders.size()), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setAvgOrderAmount(totalSales.divide(BigDecimal.valueOf(orders.size()), 2, RoundingMode.HALF_UP));
         } else {
             vo.setAvgOrderAmount(BigDecimal.ZERO);
         }
