@@ -1,7 +1,10 @@
 <template>
   <div class="cabinet-card clay-box" @click="$emit('click')">
     <div class="cabinet-map">
-      <el-icon :size="48" color="var(--color-primary)"><Location /></el-icon>
+      <img v-if="cabinet.imageUrl" :src="cabinet.imageUrl" :alt="cabinet.name" />
+      <div v-else class="map-placeholder">
+        <el-icon :size="48" color="var(--color-primary)"><Location /></el-icon>
+      </div>
     </div>
     <div class="cabinet-info">
       <h4>{{ cabinet.name }}</h4>
@@ -49,7 +52,27 @@ const statusText = computed(() => {
 
 .cabinet-map {
   height: 160px;
+  overflow: hidden;
   background: linear-gradient(135deg, #e9f1fa 0%, #d4e5f7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cabinet-map img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.cabinet-card:hover .cabinet-map img {
+  transform: scale(1.05);
+}
+
+.map-placeholder {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;

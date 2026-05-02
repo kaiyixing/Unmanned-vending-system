@@ -14,6 +14,7 @@ public class Cabinet {
     private String name;
     private String city;
     private String address;
+    private String imageUrl;
     private BigDecimal latitude;
     private BigDecimal longitude;
     private Integer capacity;

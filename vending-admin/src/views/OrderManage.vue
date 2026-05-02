@@ -1,9 +1,14 @@
 <template>
   <div class="order-manage">
     <div class="toolbar">
-      <el-select v-model="statusFilter" placeholder="订单状态" clearable style="width: 150px" @change="fetchData">
-        <el-option v-for="s in statusOptions" :key="s.value" :label="s.label" :value="s.value" />
-      </el-select>
+      <div class="toolbar-left">
+        <el-tag v-if="todayOnly" type="warning" closable @close="todayOnly = false; fetchData()">
+          仅显示今日订单
+        </el-tag>
+        <el-select v-model="statusFilter" placeholder="订单状态" clearable style="width: 150px" @change="fetchData">
+          <el-option v-for="s in statusOptions" :key="s.value" :label="s.label" :value="s.value" />
+        </el-select>
+      </div>
     </div>
 
     <el-table :data="tableData" v-loading="loading" stripe>
@@ -23,11 +28,13 @@
       </el-table-column>
       <el-table-column prop="payChannel" label="支付渠道" width="100" />
       <el-table-column prop="createTime" label="创建时间" width="180" />
-      <el-table-column label="操作" width="200" fixed="right">
+      <el-table-column label="操作" width="280" fixed="right">
         <template #default="{ row }">
-          <el-button text type="primary" @click="viewDetail(row)">详情</el-button>
-          <el-button v-if="row.status === 4" text type="success" @click="handleAudit(row, true)">同意退款</el-button>
-          <el-button v-if="row.status === 4" text type="danger" @click="handleAudit(row, false)">拒绝退款</el-button>
+          <div class="action-buttons">
+            <el-button text type="primary" @click="viewDetail(row)">详情</el-button>
+            <el-button v-if="row.status === 4" text type="success" @click="handleAudit(row, true)">同意退款</el-button>
+            <el-button v-if="row.status === 4" text type="danger" @click="handleAudit(row, false)">拒绝退款</el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -72,16 +79,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { adminOrderList, getRefundList, auditRefund } from '@/api/order'
 
+const route = useRoute()
 const loading = ref(false)
 const tableData = ref([])
 const page = ref(1)
 const size = ref(20)
 const total = ref(0)
 const statusFilter = ref(null)
+const todayOnly = ref(false)
 const detailVisible = ref(false)
 const auditVisible = ref(false)
 const currentOrder = ref(null)
@@ -132,6 +142,7 @@ async function fetchData() {
   try {
     const params = { page: page.value, size: size.value }
     if (statusFilter.value !== null) params.status = statusFilter.value
+    if (todayOnly.value) params.todayOnly = true
     const res = await adminOrderList(params)
     tableData.value = res.data.records || []
     total.value = res.data.total || 0
@@ -186,10 +197,34 @@ async function submitAudit() {
   }
 }
 
-onMounted(fetchData)
+onMounted(() => {
+  // 检查URL参数
+  if (route.query.type === 'today') {
+    todayOnly.value = true
+  }
+  fetchData()
+})
+
+// 监听路由参数变化
+watch(() => route.query, (newQuery) => {
+  if (newQuery.type === 'today') {
+    todayOnly.value = true
+  } else {
+    todayOnly.value = false
+  }
+  page.value = 1
+  fetchData()
+}, { immediate: true })
 </script>
 
 <style scoped>
 .order-manage { display: flex; flex-direction: column; gap: 16px; }
 .toolbar { display: flex; justify-content: space-between; align-items: center; }
+.toolbar-left { display: flex; align-items: center; gap: 12px; }
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 </style>

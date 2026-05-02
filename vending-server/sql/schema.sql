@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS `cabinet` (
     `name` VARCHAR(100) NOT NULL COMMENT '货柜名称',
     `city` VARCHAR(50) NOT NULL COMMENT '所在城市',
     `address` VARCHAR(255) NOT NULL COMMENT '详细地址',
+    `image_url` VARCHAR(255) DEFAULT NULL COMMENT '货柜图片URL',
     `latitude` DECIMAL(10, 7) DEFAULT NULL COMMENT '纬度',
     `longitude` DECIMAL(10, 7) DEFAULT NULL COMMENT '经度',
     `capacity` INT NOT NULL DEFAULT 50 COMMENT '货柜容量(商品格数)',

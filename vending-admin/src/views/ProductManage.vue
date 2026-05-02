@@ -45,14 +45,14 @@
         </el-form-item>
         <el-form-item label="商品图片">
           <el-upload
-            class="avatar-uploader"
-            action="http://localhost:8080/api/upload"
+            class="cabinet-uploader"
+            action="#"
             :show-file-list="false"
-            :on-success="handleUploadSuccess"
             :before-upload="beforeUpload"
+            :http-request="handleUploadProduct"
           >
-            <img v-if="form.imageUrl" :src="form.imageUrl" class="avatar">
-            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+            <img v-if="form.imageUrl" :src="form.imageUrl" style="width: 100%; height: 200px; object-fit: cover;" />
+            <el-icon v-else class="cabinet-uploader-icon" :size="40"><Plus /></el-icon>
           </el-upload>
           <div v-if="form.imageUrl" class="image-preview">
             <el-button type="danger" size="small" link @click="removeImage">删除图片</el-button>
@@ -93,6 +93,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { adminProductList, adminProductSave, adminProductUpdate, adminProductDelete } from '@/api/product'
+import { uploadImageWithPrefix } from '@/api/pickup'
 
 const loading = ref(false)
 const saving = ref(false)
@@ -140,12 +141,16 @@ function openDialog(row) {
   dialogVisible.value = true
 }
 
-function handleUploadSuccess(response) {
-  if (response.code === 200) {
-    form.imageUrl = response.data
+async function handleUploadProduct(options) {
+  try {
+    const formData = new FormData()
+    formData.append('file', options.file)
+    formData.append('prefix', 'products')
+    const res = await uploadImageWithPrefix(formData)
+    form.imageUrl = res.data.url || res.data || res
     ElMessage.success('图片上传成功')
-  } else {
-    ElMessage.error(response.message || '上传失败')
+  } catch (e) {
+    ElMessage.error(e.message || '上传失败')
   }
 }
 

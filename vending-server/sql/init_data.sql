@@ -13,10 +13,10 @@ INSERT INTO `sys_user` (`username`, `password`, `phone`, `role`, `status`) VALUE
 ('user001', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7GAt6OSaW', '13900139000', 0, 1);
 
 -- 插入测试货柜
-INSERT INTO `cabinet` (`cabinet_code`, `name`, `city`, `address`, `latitude`, `longitude`, `capacity`, `status`) VALUES
-('CAB001', '科技园A栋货柜', '深圳', '深圳市南山区科技园南路A栋一楼', 22.5329080, 113.9431060, 50, 1),
-('CAB002', '科技园B栋货柜', '深圳', '深圳市南山区科技园南路B栋一楼', 22.5331080, 113.9441060, 40, 1),
-('CAB003', '大学城货柜', '深圳', '深圳市南山区大学城C区', 22.5900080, 113.9701060, 60, 1);
+INSERT INTO `cabinet` (`cabinet_code`, `name`, `city`, `address`, `image_url`, `latitude`, `longitude`, `capacity`, `status`) VALUES
+('CAB001', '科技园A栋货柜', '深圳', '深圳市南山区科技园南路A栋一楼', 'https://placehold.co/400x300/3498db/ffffff?text=Cabinet+A', 22.5329080, 113.9431060, 50, 1),
+('CAB002', '科技园B栋货柜', '深圳', '深圳市南山区科技园南路B栋一楼', 'https://placehold.co/400x300/2ecc71/ffffff?text=Cabinet+B', 22.5331080, 113.9441060, 40, 1),
+('CAB003', '大学城货柜', '深圳', '深圳市南山区大学城C区', 'https://placehold.co/400x300/9b59b6/ffffff?text=Cabinet+C', 22.5900080, 113.9701060, 60, 1);
 
 -- 插入测试商品
 INSERT INTO `product` (`name`, `description`, `category`, `price`, `cost_price`, `spec`, `image_url`, `status`) VALUES

@@ -7,6 +7,9 @@ import com.vending.module.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("/api/admin/order")
 @RequiredArgsConstructor
@@ -19,7 +22,8 @@ public class AdminOrderController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "20") Integer size,
             @RequestParam(required = false) Integer status,
-            @RequestParam(required = false) Long cabinetId) {
+            @RequestParam(required = false) Long cabinetId,
+            @RequestParam(required = false) Boolean todayOnly) {
         Page<Order> orderPage = new Page<>(page, size);
         var query = orderService.lambdaQuery();
         
@@ -28,6 +32,11 @@ public class AdminOrderController {
         }
         if (cabinetId != null) {
             query.eq(Order::getCabinetId, cabinetId);
+        }
+        if (Boolean.TRUE.equals(todayOnly)) {
+            // 只查询今日订单（从00:00:00开始）
+            LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+            query.ge(Order::getCreateTime, todayStart);
         }
         
         orderPage = query.orderByDesc(Order::getCreateTime).page(orderPage);

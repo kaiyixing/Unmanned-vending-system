@@ -12,6 +12,7 @@ const routes = [
       { path: 'cabinet', name: 'CabinetManage', component: () => import('@/views/CabinetManage.vue') },
       { path: 'inventory', name: 'InventoryManage', component: () => import('@/views/InventoryManage.vue') },
       { path: 'order', name: 'OrderManage', component: () => import('@/views/OrderManage.vue') },
+      { path: 'pickup-verify', name: 'PickupVerify', component: () => import('@/views/PickupVerify.vue') },
       { path: 'statistics', name: 'Statistics', component: () => import('@/views/Statistics.vue') }
     ]
   }

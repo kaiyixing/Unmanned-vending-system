@@ -7,9 +7,21 @@
 
         <div class="profile-card clay-box mb-4">
           <div class="avatar-row">
-            <div class="avatar-circle">
-              <el-icon :size="48"><User /></el-icon>
-            </div>
+            <el-upload
+              class="avatar-uploader"
+              action="#"
+              :show-file-list="false"
+              :before-upload="beforeUpload"
+              :http-request="handleAvatarUpload"
+            >
+              <div class="avatar-circle">
+                <img v-if="userInfo.avatar" :src="userInfo.avatar" class="avatar" />
+                <el-icon v-else :size="48"><User /></el-icon>
+                <div class="avatar-overlay">
+                  <el-icon :size="24"><Camera /></el-icon>
+                </div>
+              </div>
+            </el-upload>
             <div class="user-info">
               <h3>{{ userInfo.username || '用户' }}</h3>
               <p class="text-muted">{{ userInfo.phone || '未绑定手机号' }}</p>
@@ -45,14 +57,15 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { User } from '@element-plus/icons-vue'
+import { User, Camera } from '@element-plus/icons-vue'
 import NavBar from '@/components/NavBar.vue'
 import { useUserStore } from '@/stores/user'
-import { getUserInfo, updateUserInfo } from '@/api/user'
+import { getUserInfo, updateUserInfo, uploadAvatar } from '@/api/user'
 
 const userStore = useUserStore()
 const loading = ref(false)
 const saving = ref(false)
+const uploading = ref(false)
 const userInfo = ref({})
 
 const form = reactive({
@@ -73,6 +86,39 @@ async function fetchInfo() {
     ElMessage.error('获取用户信息失败')
   } finally {
     loading.value = false
+  }
+}
+
+function beforeUpload(file) {
+  const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg'
+  const isPNG = file.type === 'image/png'
+  const isLt2M = file.size / 1024 / 1024 < 2
+
+  if (!isJPG && !isPNG) {
+    ElMessage.error('上传头像只能是 JPG/PNG 格式!')
+    return false
+  }
+  if (!isLt2M) {
+    ElMessage.error('上传头像大小不能超过 2MB!')
+    return false
+  }
+  return true
+}
+
+async function handleAvatarUpload({ file }) {
+  uploading.value = true
+  try {
+    const res = await uploadAvatar(file)
+    const avatarUrl = res.data
+    await updateUserInfo({
+      avatar: avatarUrl
+    })
+    userInfo.value.avatar = avatarUrl
+    ElMessage.success('头像上传成功')
+  } catch (e) {
+    ElMessage.error('头像上传失败')
+  } finally {
+    uploading.value = false
   }
 }
 
@@ -103,6 +149,10 @@ onMounted(fetchInfo)
   gap: 20px;
 }
 
+.avatar-uploader {
+  cursor: pointer;
+}
+
 .avatar-circle {
   width: 80px;
   height: 80px;
@@ -112,6 +162,32 @@ onMounted(fetchInfo)
   align-items: center;
   justify-content: center;
   color: var(--color-primary);
+  overflow: hidden;
+  position: relative;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.avatar-circle:hover .avatar-overlay {
+  display: flex;
 }
 
 .form-section { padding: 32px; }

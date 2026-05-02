@@ -14,12 +14,15 @@ public class FileUploadController {
     private final MinioService minioService;
 
     @PostMapping("/upload")
-    public Result<String> upload(@RequestParam("file") MultipartFile file) {
+    public Result<String> upload(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "prefix", required = false, defaultValue = "products") String prefix
+    ) {
         if (file.isEmpty()) {
             return Result.fail("请选择要上传的文件");
         }
 
-        String fileUrl = minioService.uploadFile(file, "products");
+        String fileUrl = minioService.uploadFile(file, prefix);
         return Result.success(fileUrl);
     }
 }

@@ -9,6 +9,12 @@
 
     <el-table :data="tableData" v-loading="loading" stripe>
       <el-table-column prop="cabinetId" label="ID" width="80" />
+      <el-table-column label="图片" width="100">
+        <template #default="{ row }">
+          <el-image v-if="row.imageUrl" :src="row.imageUrl" style="width: 60px; height: 60px; border-radius: 4px" fit="cover" />
+          <span v-else style="color: #ccc">暂无</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="cabinetCode" label="编号" width="120" />
       <el-table-column prop="name" label="货柜名称" min-width="150" />
       <el-table-column prop="city" label="城市" width="100" />
@@ -50,6 +56,18 @@
         <el-form-item label="地址">
           <el-input v-model="form.address" />
         </el-form-item>
+        <el-form-item label="图片">
+          <el-upload
+            class="cabinet-uploader"
+            action="#"
+            :show-file-list="false"
+            :before-upload="beforeUpload"
+            :http-request="handleUpload"
+          >
+            <el-image v-if="form.imageUrl" :src="form.imageUrl" style="width: 100%; height: 200px" fit="cover" />
+            <el-icon v-else class="cabinet-uploader-icon" :size="40"><Plus /></el-icon>
+          </el-upload>
+        </el-form-item>
         <el-form-item label="容量">
           <el-input-number v-model="form.capacity" :min="1" style="width: 100%" />
         </el-form-item>
@@ -72,10 +90,13 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
 import { adminCabinetList, adminCabinetSave, adminCabinetUpdate, adminCabinetDelete } from '@/api/cabinet'
+import { uploadImage, uploadImageWithPrefix } from '@/api/pickup'
 
 const loading = ref(false)
 const saving = ref(false)
+const uploading = ref(false)
 const tableData = ref([])
 const page = ref(1)
 const size = ref(20)
@@ -90,9 +111,40 @@ const form = reactive({
   name: '',
   city: '',
   address: '',
+  imageUrl: '',
   capacity: 50,
   status: 1
 })
+
+function beforeUpload(file) {
+  const isImage = file.type.startsWith('image/')
+  const isLt10M = file.size / 1024 / 1024 < 10
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件！')
+    return false
+  }
+  if (!isLt10M) {
+    ElMessage.error('图片大小不能超过 10MB！')
+    return false
+  }
+  return true
+}
+
+async function handleUpload(options) {
+  uploading.value = true
+  try {
+    const formData = new FormData()
+    formData.append('file', options.file)
+    formData.append('prefix', 'cabinets')
+    const res = await uploadImageWithPrefix(formData)
+    form.imageUrl = res.data.url || res.data || res
+    ElMessage.success('上传成功')
+  } catch (e) {
+    ElMessage.error(e.message || '上传失败')
+  } finally {
+    uploading.value = false
+  }
+}
 
 async function fetchData() {
   loading.value = true
@@ -147,4 +199,28 @@ onMounted(fetchData)
 <style scoped>
 .cabinet-manage { display: flex; flex-direction: column; gap: 16px; }
 .toolbar { display: flex; justify-content: space-between; align-items: center; }
+
+.cabinet-uploader :deep(.el-upload) {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+  width: 100%;
+}
+
+.cabinet-uploader :deep(.el-upload:hover) {
+  border-color: var(--el-color-primary);
+}
+
+.cabinet-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-page">
     <div class="stats-grid">
-      <el-card v-for="stat in stats" :key="stat.label">
+      <el-card v-for="stat in stats" :key="stat.label" class="stat-card" @click="handleStatClick(stat)">
         <div class="stat-item">
           <div class="stat-icon" :style="{ background: stat.color }">
             <el-icon :size="28"><component :is="stat.icon" /></el-icon>
@@ -39,19 +39,21 @@
 
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import { ShoppingBag, Wallet, TrendCharts, Box } from '@element-plus/icons-vue'
 import { statisticsOverview } from '@/api/statistics'
 
+const router = useRouter()
 const pieRef = ref()
 const barRef = ref()
 const topProducts = ref([])
 
 const stats = ref([
-  { label: '总订单数', value: '-', icon: ShoppingBag, color: '#A2C2E8' },
-  { label: '今日订单', value: '-', icon: TrendCharts, color: '#FFCBA4' },
-  { label: '总销售额', value: '-', icon: Wallet, color: '#BEE8D2' },
-  { label: '今日销售', value: '-', icon: Box, color: '#d4e5f7' }
+  { label: '总订单数', value: '-', icon: ShoppingBag, color: '#A2C2E8', type: 'all' },
+  { label: '今日订单', value: '-', icon: TrendCharts, color: '#FFCBA4', type: 'today' },
+  { label: '总销售额', value: '-', icon: Wallet, color: '#BEE8D2', type: 'all' },
+  { label: '今日销售', value: '-', icon: Box, color: '#d4e5f7', type: 'today' }
 ])
 
 async function fetchData() {
@@ -110,6 +112,16 @@ function renderBarChart(cabinets) {
   window.addEventListener('resize', () => chart.resize())
 }
 
+function handleStatClick(stat) {
+  // 跳转到订单管理页面
+  router.push({
+    path: '/order',
+    query: {
+      type: stat.type
+    }
+  })
+}
+
 onMounted(async () => {
   await fetchData()
   nextTick(() => {
@@ -130,6 +142,16 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
+}
+
+.stat-card {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .stat-item {

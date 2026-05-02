@@ -60,7 +60,7 @@
           <template #default="{ row }">{{ row.totalQuantity || row.quantity || 0 }}</template>
         </el-table-column>
         <el-table-column label="销售额" width="120">
-          <template #default="{ row }}">¥{{ (row.totalAmount || row.amount || 0).toFixed(2) }}</template>
+          <template #default="{ row }">¥{{ (row.totalAmount || row.amount || 0).toFixed(2) }}</template>
         </el-table-column>
       </el-table>
     </el-card>

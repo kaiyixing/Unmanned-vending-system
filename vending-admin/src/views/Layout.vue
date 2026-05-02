@@ -25,6 +25,10 @@
           <el-icon><List /></el-icon>
           <span>订单管理</span>
         </el-menu-item>
+        <el-menu-item index="/pickup-verify">
+          <el-icon><Ticket /></el-icon>
+          <span>取货验证</span>
+        </el-menu-item>
         <el-menu-item index="/statistics">
           <el-icon><TrendCharts /></el-icon>
           <span>数据统计</span>
@@ -49,7 +53,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { DataAnalysis, Goods, Shop, Box, List, TrendCharts } from '@element-plus/icons-vue'
+import { DataAnalysis, Goods, Shop, Box, List, TrendCharts, Ticket } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
@@ -64,6 +68,7 @@ const titleMap = {
   '/cabinet': '货柜管理',
   '/inventory': '库存管理',
   '/order': '订单管理',
+  '/pickup-verify': '取货验证',
   '/statistics': '数据统计'
 }
 
