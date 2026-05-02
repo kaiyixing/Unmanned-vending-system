@@ -19,13 +19,13 @@ INSERT INTO `cabinet` (`cabinet_code`, `name`, `city`, `address`, `latitude`, `l
 ('CAB003', '大学城货柜', '深圳', '深圳市南山区大学城C区', 22.5900080, 113.9701060, 60, 1);
 
 -- 插入测试商品
-INSERT INTO `product` (`name`, `description`, `category`, `price`, `cost_price`, `spec`, `status`) VALUES
-('可口可乐', '经典口味 330ml', '饮料', 3.50, 2.00, '330ml/罐', 1),
-('百事可乐', '经典口味 330ml', '饮料', 3.50, 2.00, '330ml/罐', 1),
-('农夫山泉', '天然饮用水', '饮料', 2.00, 1.00, '550ml/瓶', 1),
-('康师傅红烧牛肉面', '经典方便面', '零食', 5.00, 3.00, '105g/袋', 1),
-('乐事薯片', '原味薯片', '零食', 7.50, 4.50, '70g/袋', 1),
-('卫龙辣条', '经典辣条', '零食', 1.50, 0.80, '65g/袋', 1);
+INSERT INTO `product` (`name`, `description`, `category`, `price`, `cost_price`, `spec`, `image_url`, `status`) VALUES
+('可口可乐', '经典口味 330ml', '饮料', 3.50, 2.00, '330ml/罐', 'https://placehold.co/400x400/ff6b6b/ffffff?text=Coca-Cola', 1),
+('百事可乐', '经典口味 330ml', '饮料', 3.50, 2.00, '330ml/罐', 'https://placehold.co/400x400/3498db/ffffff?text=Pepsi', 1),
+('农夫山泉', '天然饮用水', '饮料', 2.00, 1.00, '550ml/瓶', 'https://placehold.co/400x400/2ecc71/ffffff?text=Water', 1),
+('康师傅红烧牛肉面', '经典方便面', '零食', 5.00, 3.00, '105g/袋', 'https://placehold.co/400x400/f39c12/ffffff?text=Noodles', 1),
+('乐事薯片', '原味薯片', '零食', 7.50, 4.50, '70g/袋', 'https://placehold.co/400x400/9b59b6/ffffff?text=Chips', 1),
+('卫龙辣条', '经典辣条', '零食', 1.50, 0.80, '65g/袋', 'https://placehold.co/400x400/e74c3c/ffffff?text=Spicy', 1);
 
 -- 插入测试库存
 INSERT INTO `inventory` (`cabinet_id`, `product_id`, `quantity`, `threshold`) VALUES

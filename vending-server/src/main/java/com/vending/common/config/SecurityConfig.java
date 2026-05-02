@@ -33,6 +33,7 @@ public class SecurityConfig {
                     "/api/cabinet/list",
                     "/api/cabinet/*/products",
                     "/api/product/**",
+                    "/api/upload",
                     "/error"
                 ).permitAll()
                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")

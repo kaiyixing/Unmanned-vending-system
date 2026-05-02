@@ -43,6 +43,21 @@
         <el-form-item label="商品名称">
           <el-input v-model="form.name" />
         </el-form-item>
+        <el-form-item label="商品图片">
+          <el-upload
+            class="avatar-uploader"
+            action="http://localhost:8080/api/upload"
+            :show-file-list="false"
+            :on-success="handleUploadSuccess"
+            :before-upload="beforeUpload"
+          >
+            <img v-if="form.imageUrl" :src="form.imageUrl" class="avatar">
+            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+          </el-upload>
+          <div v-if="form.imageUrl" class="image-preview">
+            <el-button type="danger" size="small" link @click="removeImage">删除图片</el-button>
+          </div>
+        </el-form-item>
         <el-form-item label="分类">
           <el-input v-model="form.category" />
         </el-form-item>
@@ -76,6 +91,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
 import { adminProductList, adminProductSave, adminProductUpdate, adminProductDelete } from '@/api/product'
 
 const loading = ref(false)
@@ -96,6 +112,7 @@ const form = reactive({
   costPrice: 0,
   spec: '',
   description: '',
+  imageUrl: '',
   status: 1
 })
 
@@ -121,6 +138,34 @@ function openDialog(row) {
     Object.keys(form).forEach(k => form[k] = k === 'status' ? 1 : '')
   }
   dialogVisible.value = true
+}
+
+function handleUploadSuccess(response) {
+  if (response.code === 200) {
+    form.imageUrl = response.data
+    ElMessage.success('图片上传成功')
+  } else {
+    ElMessage.error(response.message || '上传失败')
+  }
+}
+
+function beforeUpload(file) {
+  const isImage = file.type.startsWith('image/')
+  const isLt10M = file.size / 1024 / 1024 < 10
+
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件!')
+    return false
+  }
+  if (!isLt10M) {
+    ElMessage.error('图片大小不能超过10MB!')
+    return false
+  }
+  return true
+}
+
+function removeImage() {
+  form.imageUrl = ''
 }
 
 async function handleSave() {
@@ -152,4 +197,40 @@ onMounted(fetchData)
 <style scoped>
 .product-manage { display: flex; flex-direction: column; gap: 16px; }
 .toolbar { display: flex; justify-content: space-between; align-items: center; }
+
+.avatar-uploader .avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.avatar-uploader :deep(.el-upload) {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader :deep(.el-upload:hover) {
+  border-color: var(--el-color-primary);
+}
+
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-preview {
+  margin-top: 8px;
+}
 </style>
