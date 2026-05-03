@@ -38,28 +38,28 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deductStock(Long cabinetId, Long orderId) {
-        String lockKey = INVENTORY_LOCK_KEY + cabinetId;
+        List<OrderItem> items = orderItemMapper.selectList(
+                new LambdaQueryWrapper<OrderItem>()
+                        .eq(OrderItem::getOrderId, orderId));
 
-        Boolean locked = redisTemplate.opsForValue()
-                .setIfAbsent(lockKey, "1", 10, TimeUnit.SECONDS);
-        if (Boolean.FALSE.equals(locked)) {
-            throw new BusinessException(ResultCode.INVENTORY_ERROR, "库存操作繁忙，请稍后重试");
-        }
+        for (OrderItem item : items) {
+            String lockKey = INVENTORY_LOCK_KEY + cabinetId + ":" + item.getProductId();
 
-        try {
-            List<OrderItem> items = orderItemMapper.selectList(
-                    new LambdaQueryWrapper<OrderItem>()
-                            .eq(OrderItem::getOrderId, orderId));
+            Boolean locked = redisTemplate.opsForValue()
+                    .setIfAbsent(lockKey, "1", 10, TimeUnit.SECONDS);
+            if (Boolean.FALSE.equals(locked)) {
+                throw new BusinessException(ResultCode.INVENTORY_ERROR, "库存操作繁忙，请稍后重试");
+            }
 
-            for (OrderItem item : items) {
+            try {
                 int affected = this.getBaseMapper().deductStock(
                         cabinetId, item.getProductId(), item.getQuantity());
                 if (affected == 0) {
                     throw new BusinessException(ResultCode.INSUFFICIENT_STOCK);
                 }
+            } finally {
+                redisTemplate.delete(lockKey);
             }
-        } finally {
-            redisTemplate.delete(lockKey);
         }
     }
 
