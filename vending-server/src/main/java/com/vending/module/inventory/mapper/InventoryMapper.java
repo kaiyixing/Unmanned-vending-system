@@ -16,7 +16,8 @@ public interface InventoryMapper extends BaseMapper<Inventory> {
                     @Param("quantity") Integer quantity);
 
     @Update("UPDATE inventory SET quantity = quantity + #{quantity}, update_time = NOW() " +
-            "WHERE cabinet_id = #{cabinetId} AND product_id = #{productId}")
+            "WHERE cabinet_id = #{cabinetId} AND product_id = #{productId} " +
+            "AND quantity + #{quantity} >= 0")
     int addStock(@Param("cabinetId") Long cabinetId,
                  @Param("productId") Long productId,
                  @Param("quantity") Integer quantity);

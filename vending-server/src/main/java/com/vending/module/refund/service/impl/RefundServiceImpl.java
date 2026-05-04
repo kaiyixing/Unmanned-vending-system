@@ -63,15 +63,17 @@ public class RefundServiceImpl extends ServiceImpl<RefundMapper, Refund> impleme
         }
 
         if (approved) {
+            Order order = orderService.getById(refund.getOrderId());
+            
+            // 先回滚库存，再更新状态
+            inventoryService.rollbackStock(order.getCabinetId(), order.getOrderId());
+            
             refund.setStatus(3);
             refund.setAuditRemark(remark);
             this.updateById(refund);
 
-            Order order = orderService.getById(refund.getOrderId());
             order.setStatus(5);
             orderService.updateById(order);
-
-            inventoryService.rollbackStock(order.getCabinetId(), order.getOrderId());
         } else {
             refund.setStatus(2);
             refund.setAuditRemark(remark);
