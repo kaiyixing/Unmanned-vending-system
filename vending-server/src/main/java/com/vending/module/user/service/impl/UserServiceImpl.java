@@ -1,6 +1,7 @@
 package com.vending.module.user.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.vending.common.cache.RedisCacheUtil;
 import com.vending.common.exception.BusinessException;
 import com.vending.common.result.ResultCode;
 import com.vending.common.util.JwtUtil;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -25,6 +27,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final RedisCacheUtil redisCacheUtil;
 
     @Override
     public void register(RegisterRequest request) {
@@ -65,14 +68,67 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ResultCode.ACCOUNT_DISABLED);
         }
 
-        String token = jwtUtil.generateToken(user.getUserId(), user.getUsername(), user.getRole());
+        String accessToken = jwtUtil.generateAccessToken(user.getUserId(), user.getUsername(), user.getRole());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getUserId(), user.getUsername());
+
+        // 保存 Refresh Token 到 Redis，过期时间和 Token 一致
+        redisCacheUtil.set(RedisCacheUtil.KEY_REFRESH_TOKEN + user.getUserId(), refreshToken, 7, TimeUnit.DAYS);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("token", token);
+        data.put("accessToken", accessToken);
+        data.put("refreshToken", refreshToken);
         data.put("userId", user.getUserId());
         data.put("username", user.getUsername());
         data.put("role", user.getRole());
         return data;
+    }
+
+    /**
+     * 刷新 Token
+     */
+    public Map<String, Object> refreshToken(String refreshToken) {
+        try {
+            Long userId = jwtUtil.getUserId(refreshToken);
+            String tokenType = jwtUtil.getTokenType(refreshToken);
+
+            // 验证 Token 类型
+            if (!"refresh".equals(tokenType)) {
+                throw new BusinessException(ResultCode.TOKEN_INVALID);
+            }
+
+            // 验证 Token 是否在 Redis 中
+            String storedToken = redisCacheUtil.get(RedisCacheUtil.KEY_REFRESH_TOKEN + userId, String.class);
+            if (!refreshToken.equals(storedToken)) {
+                throw new BusinessException(ResultCode.TOKEN_INVALID);
+            }
+
+            User user = this.getById(userId);
+            String newAccessToken = jwtUtil.generateAccessToken(userId, user.getUsername(), user.getRole());
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("accessToken", newAccessToken);
+            return data;
+        } catch (Exception e) {
+            throw new BusinessException(ResultCode.TOKEN_INVALID);
+        }
+    }
+
+    /**
+     * 登出
+     */
+    public void logout(String accessToken, String refreshToken, Long userId) {
+        // 将 Access Token 加入黑名单，过期时间和 Token 一致
+        if (accessToken != null && !accessToken.isEmpty()) {
+            try {
+                long ttl = jwtUtil.getExpiration(accessToken);
+                if (ttl > 0) {
+                    redisCacheUtil.set(RedisCacheUtil.KEY_JWT_BLACKLIST + accessToken, "1", ttl, TimeUnit.MILLISECONDS);
+                }
+            } catch (Exception ignored) {}
+        }
+
+        // 删除 Refresh Token
+        redisCacheUtil.delete(RedisCacheUtil.KEY_REFRESH_TOKEN + userId);
     }
 
     @Override

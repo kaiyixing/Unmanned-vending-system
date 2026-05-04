@@ -8,6 +8,14 @@ export function registerApi(data) {
   return request.post('/user/register', data)
 }
 
+export function refreshTokenApi(data) {
+  return request.post('/user/refresh', data)
+}
+
+export function logoutApi(data) {
+  return request.post('/user/logout', data)
+}
+
 export function getUserInfo() {
   return request.get('/user/info')
 }

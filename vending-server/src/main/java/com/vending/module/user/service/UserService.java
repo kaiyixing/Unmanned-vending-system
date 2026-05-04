@@ -11,6 +11,8 @@ import java.util.Map;
 public interface UserService extends IService<User> {
     void register(RegisterRequest request);
     Map<String, Object> login(LoginRequest request);
+    Map<String, Object> refreshToken(String refreshToken);
+    void logout(String accessToken, String refreshToken, Long userId);
     UserVO getUserInfo(Long userId);
     void updateUserInfo(Long userId, UserVO userVO);
 }

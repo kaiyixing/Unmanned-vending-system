@@ -26,6 +26,55 @@
 
 ---
 
+## 🔐 安全认证升级
+
+### 双Token机制
+- **Access Token**：短期令牌，用于API访问认证（默认2小时）
+- **Refresh Token**：长期令牌，用于刷新Access Token（默认7天）
+- **Token刷新接口**：`/api/user/refresh`
+- **JWT黑名单**：支持主动注销Token，防止滥用
+
+### Redis数据内容详解
+
+**1. 热点数据缓存
+
+| Key 前缀 | 用途 | 缓存内容 | 过期时间 |
+|----------|------|---------|---------|
+| `cache:product:list:` | 商品列表缓存 | 分页商品数据 | 30 分钟 |
+| `cache:cabinet:list:` | 货柜列表缓存 | 分页货柜数据 | 30 分钟 |
+| `cache:cabinet:products:` | 货柜商品缓存 | 货柜商品列表 | 30 分钟 |
+
+**2. 安全认证相关缓存
+
+| Key 前缀 | 用途 | 缓存内容 | 过期时间 |
+|----------|------|---------|---------|
+| `jwt:blacklist:` | JWT黑名单 | 已注销的Access Token | 与Token过期时间一致 |
+| `jwt:refresh:` | Refresh Token存储 | 用户Refresh Token | 7 天 |
+
+**3. 分布式锁
+
+| Key 前缀 | 用途 | 锁内容 | 过期时间 |
+|----------|------|---------|---------|
+| `inventory:lock:` | 库存扣减分布式锁 | 锁标记 | 10 秒 |
+
+### 库存扣减防超卖机制
+
+为了防止库存超卖，确保商品不会为负数，系统采用了 **Redis 分布式锁 + 乐观锁双重保障机制：
+
+1. **Redis 分布式锁：
+   - 使用 `setIfAbsent` (SETNX) 确保同一时间只有一个请求能获取锁
+   - 锁超时时间 10 秒，防止死锁
+   - 操作完成后释放锁
+
+2. **数据库乐观锁：
+   - SQL 条件中增加 `quantity >= #{quantity}`
+   - 只有库存足够时才能扣减成功
+   - 返回受影响行数为 0 表示库存不足
+
+这种双重机制确保在高并发场景下库存绝对不会出现负数！
+
+---
+
 ## 🛠️ 技术栈
 
 | 层级 | 技术选型 | 版本 |
@@ -36,7 +85,7 @@
 | 数据库 | MySQL | 8.0 |
 | 缓存 | Redis | 7+ |
 | 对象存储 | MinIO | 8.5.7 |
-| 安全认证 | Spring Security + JWT | - |
+| 安全认证 | Spring Security + JWT (双Token机制) | - |
 | 用户端 | Vue 3 + Vite + Element Plus | - |
 | 管理后台 | Vue 3 + Vite + Element Plus + ECharts | - |
 

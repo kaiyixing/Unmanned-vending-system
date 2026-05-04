@@ -45,8 +45,19 @@ cd vending-admin && npm run dev
 ## 核心实现
 
 - **后端包**：`com.vending.module.{user,product,cabinet,inventory,order,payment,pickup,refund,statistics}`
-- **公共模块**：`com.vending.common` — Result/ResultCode/异常处理/JWT/CORS
-- **安全**：Spring Security + JWT，`role` 存数字(0/1/2)，映射在 `JwtAuthenticationFilter.getRoleName()`
+- **公共模块**：`com.vending.common` — Result/ResultCode/异常处理/JWT/CORS/Redis缓存
+- **安全**：Spring Security + JWT 双Token机制
+  - Access Token：短期（2小时）
+  - Refresh Token：长期（7天）
+  - JWT黑名单机制：支持主动注销Token
+  - Token刷新接口：`/api/user/refresh`
+  - `role` 存数字(0/1/2)，映射在 `JwtAuthenticationFilter.getRoleName()`
+- **Redis缓存**：
+  - 商品列表缓存：`cache:product:list:`
+  - 货柜列表缓存：`cache:cabinet:list:`
+  - 货柜商品缓存：`cache:cabinet:products:`
+  - JWT黑名单：`jwt:blacklist:`
+  - Refresh Token存储：`jwt:refresh:`
 - **并发**：Redis SETNX 分布式锁 + MySQL 乐观锁
 
 ## 前端要点

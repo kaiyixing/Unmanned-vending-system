@@ -1,5 +1,6 @@
 package com.vending.security;
 
+import com.vending.common.cache.RedisCacheUtil;
 import com.vending.common.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,6 +22,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final RedisCacheUtil redisCacheUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -31,6 +33,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
             try {
+                // 检查是否在黑名单
+                if (redisCacheUtil.exists(RedisCacheUtil.KEY_JWT_BLACKLIST + token)) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
                 Long userId = jwtUtil.getUserId(token);
                 String username = jwtUtil.parseToken(token).getSubject();
                 Integer role = jwtUtil.getRole(token);

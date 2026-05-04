@@ -33,7 +33,9 @@ public enum ResultCode {
     PAYMENT_TIMEOUT(6002, "支付超时"),
 
     PICKUP_CODE_EXPIRED(7001, "取货码已过期"),
-    PICKUP_CODE_USED(7002, "取货码已使用");
+    PICKUP_CODE_USED(7002, "取货码已使用"),
+
+    TOKEN_INVALID(8001, "Token无效或已过期");
 
     private final int code;
     private final String message;

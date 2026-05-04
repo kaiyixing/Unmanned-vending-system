@@ -17,21 +17,49 @@ public class JwtUtil {
     private String secret;
 
     @Value("${jwt.expiration}")
-    private Long expiration;
+    private Long accessExpiration;
+
+    @Value("${jwt.refreshExpiration:604800000}") // 默认 7 天
+    private Long refreshExpiration;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(Long userId, String username, Integer role) {
+    /**
+     * 生成 Access Token（短期）
+     */
+    public String generateAccessToken(Long userId, String username, Integer role) {
         return Jwts.builder()
                 .subject(username)
                 .claim("userId", userId)
                 .claim("role", role)
+                .claim("type", "access")
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .expiration(new Date(System.currentTimeMillis() + accessExpiration))
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    /**
+     * 生成 Refresh Token（长期）
+     */
+    public String generateRefreshToken(Long userId, String username) {
+        return Jwts.builder()
+                .subject(username)
+                .claim("userId", userId)
+                .claim("type", "refresh")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + refreshExpiration))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    /**
+     * 兼容旧方法（保留以便不会破坏现有代码）
+     */
+    public String generateToken(Long userId, String username, Integer role) {
+        return generateAccessToken(userId, username, role);
     }
 
     public Claims parseToken(String token) {
@@ -50,7 +78,15 @@ public class JwtUtil {
         return parseToken(token).get("role", Integer.class);
     }
 
+    public String getTokenType(String token) {
+        return parseToken(token).get("type", String.class);
+    }
+
     public boolean isTokenExpired(String token) {
         return parseToken(token).getExpiration().before(new Date());
+    }
+
+    public long getExpiration(String token) {
+        return parseToken(token).getExpiration().getTime() - System.currentTimeMillis();
     }
 }

@@ -1,11 +1,14 @@
 package com.vending.module.product.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.vending.common.cache.RedisCacheUtil;
 import com.vending.common.result.Result;
 import com.vending.module.product.entity.Product;
 import com.vending.module.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/product")
@@ -13,12 +16,21 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductService productService;
+    private final RedisCacheUtil redisCacheUtil;
 
     @GetMapping("/list")
     public Result<Page<Product>> list(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "20") Integer size,
             @RequestParam(required = false) String category) {
+        String cacheKey = RedisCacheUtil.KEY_PRODUCT_LIST + page + ":" + size + ":" + (category == null ? "all" : category);
+        
+        @SuppressWarnings("unchecked")
+        Page<Product> cached = redisCacheUtil.get(cacheKey, Page.class);
+        if (cached != null) {
+            return Result.success(cached);
+        }
+
         Page<Product> productPage = new Page<>(page, size);
         if (category != null && !category.isEmpty()) {
             productPage = productService.lambdaQuery()
@@ -30,6 +42,8 @@ public class ProductController {
                     .eq(Product::getStatus, 1)
                     .page(productPage);
         }
+
+        redisCacheUtil.set(cacheKey, productPage, 30, TimeUnit.MINUTES);
         return Result.success(productPage);
     }
 
@@ -42,18 +56,21 @@ public class ProductController {
     @PostMapping
     public Result<Void> save(@RequestBody Product product) {
         productService.save(product);
+        redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_PRODUCT_LIST);
         return Result.success();
     }
 
     @PutMapping
     public Result<Void> update(@RequestBody Product product) {
         productService.updateById(product);
+        redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_PRODUCT_LIST);
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         productService.removeById(id);
+        redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_PRODUCT_LIST);
         return Result.success();
     }
 }

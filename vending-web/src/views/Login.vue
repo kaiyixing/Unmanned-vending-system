@@ -94,8 +94,15 @@ async function handleLogin() {
   await loginFormRef.value.validate()
   try {
     const res = await loginApi(loginForm)
-    if (res.data && res.data.token) {
-      userStore.setToken(res.data.token)
+    if (res.data) {
+      // 优先使用 accessToken，兼容旧的 token
+      const token = res.data.accessToken || res.data.token
+      if (token) {
+        userStore.setAccessToken(token)
+      }
+      if (res.data.refreshToken) {
+        userStore.setRefreshToken(res.data.refreshToken)
+      }
       userStore.setUserInfo(res.data)
       ElMessage.success('登录成功')
       window.location.href = '/'

@@ -8,6 +8,13 @@
 | 服务器名称或IP | localhost |
 | 端口号 | 8080 |
 
+## 二、JWT 双 Token 机制说明
+
+系统采用 JWT 双 Token 机制：
+- **Access Token**：短期令牌（2小时），用于 API 访问认证
+- **Refresh Token**：长期令牌（7天），用于刷新 Access Token
+- 登录接口同时返回两个 Token，后续请求使用 Access Token
+
 ---
 
 ## 二、测试计划结构
@@ -118,7 +125,7 @@
 
 **HTTP 头部信息**
 - 名称：Authorization
-- 值：Bearer ${token}
+- 值：Bearer ${accessToken}
 
 **参数 (消息体数据)**
 ```json
@@ -151,7 +158,7 @@
 
 ---
 
-## 四、监听器配置
+## 五、监听器配置
 
 ### 查看结果树
 - 用于调试时开启，查看每个请求的响应
@@ -174,20 +181,43 @@
 
 ---
 
-## 五、单独接口测试配置
+## 六、单独接口测试配置
 
 ### 测试单个接口也可以单独测试以下接口：
 
 | 接口 | 方法 | 路径 | 说明 |
-|------|------|------|
+|------|------|------|------|
 | 商品列表 | GET | /api/product/list | 无需认证 |
 | 货柜列表 | GET | /api/cabinet/list | 无需认证 |
 | 货柜商品 | GET | /api/cabinet/{id}/products | 无需认证 |
-| 用户登录 | POST | /api/user/login | 获取token |
+| 用户登录 | POST | /api/user/login | 获取双 Token |
+| Token 刷新 | POST | /api/user/refresh | 使用 Refresh Token 刷新 |
 
 ---
 
-## 六、测试数据准备
+### 2.7 Token 刷新接口（可选，用于长时间测试）
+
+**HTTP 请求**
+- 名称：刷新 Token
+- 方法：POST
+- 路径：/api/user/refresh
+- 内容编码：UTF-8
+
+**参数 (消息体数据)**
+```json
+{
+  "refreshToken": "${refreshToken}"
+}
+```
+
+**JSON 提取器 (提取新的 accessToken)**
+- 引用名称：accessToken
+- JSON Path 表达式：$.data.accessToken
+- 匹配号：0
+
+---
+
+## 七、测试数据准备
 
 执行以下 SQL 确保测试数据存在：
 
@@ -211,7 +241,7 @@ INSERT IGNORE INTO `inventory` (`cabinet_id`, `product_id`, `quantity`, `thresho
 
 ---
 
-## 七、压力测试建议
+## 八、压力测试建议
 
 ### 第一阶段：基准测试
 - 线程数：10
@@ -229,7 +259,7 @@ INSERT IGNORE INTO `inventory` (`cabinet_id`, `product_id`, `quantity`, `thresho
 
 ---
 
-## 八、关键性能指标参考
+## 九、关键性能指标参考
 
 | 指标 | 目标值 |
 |------|--------|
@@ -240,10 +270,12 @@ INSERT IGNORE INTO `inventory` (`cabinet_id`, `product_id`, `quantity`, `thresho
 
 ---
 
-## 九、注意事项
+## 十、注意事项
 
 1. 确保后端服务已启动
 2. 确保 MySQL 和 Redis 已启动
 3. 测试前执行数据准备 SQL
 4. 先小范围测试，确认无误后再加压
 5. 关注服务器资源使用情况 (CPU、内存、IO)
+6. Redis 用于缓存热点数据和存储 Token 信息
+7. 长时间测试建议定期刷新 Token（可选，通过后置处理器实现）

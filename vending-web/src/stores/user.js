@@ -1,13 +1,24 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { logoutApi } from '@/api/user'
 
 export const useUserStore = defineStore('user', () => {
-  const token = ref(localStorage.getItem('token') || '')
+  const accessToken = ref(localStorage.getItem('accessToken') || localStorage.getItem('token') || '')
+  const refreshToken = ref(localStorage.getItem('refreshToken') || '')
   const userInfo = ref(JSON.parse(localStorage.getItem('userInfo') || '{}'))
 
-  function setToken(t) {
-    token.value = t
-    localStorage.setItem('token', t)
+  // 兼容旧的 token 字段
+  const token = accessToken
+
+  function setAccessToken(newToken) {
+    accessToken.value = newToken
+    localStorage.setItem('accessToken', newToken)
+    localStorage.setItem('token', newToken) // 兼容旧代码
+  }
+
+  function setRefreshToken(newToken) {
+    refreshToken.value = newToken
+    localStorage.setItem('refreshToken', newToken)
   }
 
   function setUserInfo(info) {
@@ -15,12 +26,20 @@ export const useUserStore = defineStore('user', () => {
     localStorage.setItem('userInfo', JSON.stringify(info))
   }
 
-  function logout() {
-    token.value = ''
+  async function logout() {
+    try {
+      await logoutApi({ refreshToken: refreshToken.value })
+    } catch (e) {
+      // 忽略错误，继续清理本地状态
+    }
+    accessToken.value = ''
+    refreshToken.value = ''
     userInfo.value = {}
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
     localStorage.removeItem('token')
     localStorage.removeItem('userInfo')
   }
 
-  return { token, userInfo, setToken, setUserInfo, logout }
+  return { accessToken, refreshToken, token, userInfo, setAccessToken, setRefreshToken, setUserInfo, logout }
 })
