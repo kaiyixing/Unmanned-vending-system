@@ -11,3 +11,7 @@ export function adminInventoryAlerts() {
 export function adminInventoryUpdate(data) {
   return request.put('/inventory', data)
 }
+
+export function adminInventoryAdd(data) {
+  return request.post('/inventory', data)
+}

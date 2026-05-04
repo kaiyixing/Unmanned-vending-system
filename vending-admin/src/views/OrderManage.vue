@@ -13,9 +13,17 @@
 
     <el-table :data="tableData" v-loading="loading" stripe>
       <el-table-column prop="orderId" label="ID" width="80" />
-      <el-table-column prop="orderNo" label="订单号" width="200" />
-      <el-table-column prop="userId" label="用户ID" width="100" />
-      <el-table-column prop="cabinetId" label="货柜ID" width="100" />
+      <el-table-column prop="orderNo" label="订单号" width="180" />
+      <el-table-column label="用户" width="120">
+        <template #default="{ row }">
+          {{ getUserName(row.userId) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="货柜" min-width="150">
+        <template #default="{ row }">
+          {{ getCabinetName(row.cabinetId) }}
+        </template>
+      </el-table-column>
       <el-table-column prop="totalAmount" label="金额" width="100">
         <template #default="{ row }">¥{{ row.totalAmount }}</template>
       </el-table-column>
@@ -27,16 +35,19 @@
         </template>
       </el-table-column>
       <el-table-column prop="payChannel" label="支付渠道" width="100" />
-      <el-table-column prop="createTime" label="创建时间" width="180" />
+      <el-table-column prop="createTime" label="创建时间" width="160" />
       <el-table-column label="操作" width="280" fixed="right">
         <template #default="{ row }">
           <div class="action-buttons">
             <el-button text type="primary" @click="viewDetail(row)">详情</el-button>
-            <el-button v-if="row.status === 4" text type="success" @click="handleAudit(row, true)">同意退款</el-button>
-            <el-button v-if="row.status === 4" text type="danger" @click="handleAudit(row, false)">拒绝退款</el-button>
+            <el-button v-if="row.status === 4" text type="success" @click="handleAudit(row, true)">同意</el-button>
+            <el-button v-if="row.status === 4" text type="danger" @click="handleAudit(row, false)">拒绝</el-button>
           </div>
         </template>
       </el-table-column>
+      <template #empty>
+        <el-empty description="暂无订单数据" />
+      </template>
     </el-table>
 
     <el-pagination
@@ -49,12 +60,14 @@
     <el-dialog v-model="detailVisible" title="订单详情" width="600px">
       <div v-if="currentOrder">
         <p><strong>订单号：</strong>{{ currentOrder.orderNo }}</p>
+        <p><strong>用户：</strong>{{ getUserName(currentOrder.userId) }}</p>
+        <p><strong>货柜：</strong>{{ getCabinetName(currentOrder.cabinetId) }}</p>
         <p><strong>状态：</strong>{{ getStatusText(currentOrder.status) }}</p>
         <p><strong>金额：</strong>¥{{ currentOrder.totalAmount }}</p>
         <p><strong>支付渠道：</strong>{{ currentOrder.payChannel || '-' }}</p>
         <p><strong>创建时间：</strong>{{ currentOrder.createTime }}</p>
         <p><strong>支付时间：</strong>{{ currentOrder.payTime || '-' }}</p>
-        <div v-if="currentRefund" style="margin-top: 16px; padding: 12px; background: #f5f7fa; border-radius: 4px;">
+        <div v-if="currentRefund" style="margin-top: 16px; padding: 12px; background: var(--admin-bg); border-radius: 12px;">
           <p><strong>退款信息：</strong></p>
           <p>退款原因：{{ currentRefund.reason }}</p>
           <p>退款金额：¥{{ currentRefund.amount }}</p>
@@ -83,6 +96,8 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { adminOrderList, getRefundList, auditRefund } from '@/api/order'
+import { adminCabinetList } from '@/api/cabinet'
+import { userList } from '@/api/user'
 
 const route = useRoute()
 const loading = ref(false)
@@ -99,6 +114,8 @@ const currentRefund = ref(null)
 const auditApproved = ref(false)
 const auditRemark = ref('')
 const refundList = ref([])
+const cabinets = ref([])
+const users = ref([])
 
 const statusOptions = [
   { value: null, label: '全部' },
@@ -137,6 +154,16 @@ function getRefundStatusText(status) {
   return refundStatusMap[status]?.text || '未知'
 }
 
+function getUserName(userId) {
+  const user = users.value.find(u => u.userId === userId)
+  return user ? user.username : `用户#${userId}`
+}
+
+function getCabinetName(cabinetId) {
+  const cabinet = cabinets.value.find(c => c.cabinetId === cabinetId)
+  return cabinet ? `${cabinet.name} (${cabinet.city})` : `货柜#${cabinetId}`
+}
+
 async function fetchData() {
   loading.value = true
   try {
@@ -161,6 +188,20 @@ async function fetchRefunds() {
   }
 }
 
+async function fetchCabinets() {
+  try {
+    const res = await adminCabinetList({ page: 1, size: 100 })
+    cabinets.value = res.data.records || []
+  } catch (e) {}
+}
+
+async function fetchUsers() {
+  try {
+    const res = await userList()
+    users.value = res.data || []
+  } catch (e) {}
+}
+
 function viewDetail(row) {
   currentOrder.value = row
   currentRefund.value = refundList.value.find(r => r.orderId === row.orderId) || null
@@ -173,7 +214,7 @@ async function handleAudit(row, approved) {
     ElMessage.error('未找到退款记录')
     return
   }
-  
+
   currentOrder.value = row
   auditApproved.value = approved
   auditRemark.value = ''
@@ -186,7 +227,7 @@ async function submitAudit() {
     ElMessage.error('未找到退款记录')
     return
   }
-  
+
   try {
     await auditRefund(refund.refundId, auditApproved.value, auditRemark.value)
     ElMessage.success(auditApproved.value ? '已同意退款' : '已拒绝退款')
@@ -198,14 +239,14 @@ async function submitAudit() {
 }
 
 onMounted(() => {
-  // 检查URL参数
   if (route.query.type === 'today') {
     todayOnly.value = true
   }
+  fetchCabinets()
+  fetchUsers()
   fetchData()
 })
 
-// 监听路由参数变化
 watch(() => route.query, (newQuery) => {
   if (newQuery.type === 'today') {
     todayOnly.value = true
@@ -219,7 +260,15 @@ watch(() => route.query, (newQuery) => {
 
 <style scoped>
 .order-manage { display: flex; flex-direction: column; gap: 16px; }
-.toolbar { display: flex; justify-content: space-between; align-items: center; }
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--admin-white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-clay);
+}
 .toolbar-left { display: flex; align-items: center; gap: 12px; }
 
 .action-buttons {

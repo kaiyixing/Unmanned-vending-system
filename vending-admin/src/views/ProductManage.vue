@@ -9,6 +9,19 @@
 
     <el-table :data="tableData" v-loading="loading" stripe>
       <el-table-column prop="productId" label="ID" width="80" />
+      <el-table-column label="图片" width="80">
+        <template #default="{ row }">
+          <el-image
+            v-if="row.imageUrl"
+            :src="row.imageUrl"
+            style="width: 50px; height: 50px; border-radius: 8px;"
+            fit="cover"
+            :preview-src-list="[row.imageUrl]"
+            preview-teleported
+          />
+          <span v-else style="color: #ccc; font-size: 12px;">暂无</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="name" label="商品名称" min-width="150" />
       <el-table-column prop="category" label="分类" width="100" />
       <el-table-column prop="price" label="价格" width="100">
@@ -28,6 +41,9 @@
           <el-button text type="danger" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
+      <template #empty>
+        <el-empty description="暂无商品数据" />
+      </template>
     </el-table>
 
     <el-pagination
@@ -37,7 +53,6 @@
       @current-change="fetchData"
     />
 
-    <!-- Dialog -->
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑商品' : '新增商品'" width="500px">
       <el-form :model="form" label-width="80px">
         <el-form-item label="商品名称">
@@ -51,7 +66,7 @@
             :before-upload="beforeUpload"
             :http-request="handleUploadProduct"
           >
-            <img v-if="form.imageUrl" :src="form.imageUrl" style="width: 100%; height: 200px; object-fit: cover;" />
+            <img v-if="form.imageUrl" :src="form.imageUrl" style="width: 100%; height: 200px; object-fit: cover; border-radius: 12px;" />
             <el-icon v-else class="cabinet-uploader-icon" :size="40"><Plus /></el-icon>
           </el-upload>
           <div v-if="form.imageUrl" class="image-preview">
@@ -201,34 +216,35 @@ onMounted(fetchData)
 
 <style scoped>
 .product-manage { display: flex; flex-direction: column; gap: 16px; }
-.toolbar { display: flex; justify-content: space-between; align-items: center; }
-
-.avatar-uploader .avatar {
-  width: 178px;
-  height: 178px;
-  display: block;
-  object-fit: cover;
-  border-radius: 6px;
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--admin-white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-clay);
 }
 
-.avatar-uploader :deep(.el-upload) {
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
+.cabinet-uploader :deep(.el-upload) {
+  border: 1px dashed var(--admin-border);
+  border-radius: 12px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: var(--el-transition-duration-fast);
+  transition: all 0.3s;
+  width: 100%;
 }
 
-.avatar-uploader :deep(.el-upload:hover) {
-  border-color: var(--el-color-primary);
+.cabinet-uploader :deep(.el-upload:hover) {
+  border-color: var(--admin-primary);
 }
 
-.avatar-uploader-icon {
+.cabinet-uploader-icon {
   font-size: 28px;
   color: #8c939d;
-  width: 178px;
-  height: 178px;
+  width: 100%;
+  height: 200px;
   text-align: center;
   display: flex;
   align-items: center;

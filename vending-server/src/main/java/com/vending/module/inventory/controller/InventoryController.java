@@ -46,4 +46,10 @@ public class InventoryController {
         inventoryService.updateById(inventory);
         return Result.success();
     }
+
+    @PostMapping
+    public Result<Void> add(@RequestBody Inventory inventory) {
+        inventoryService.save(inventory);
+        return Result.success();
+    }
 }

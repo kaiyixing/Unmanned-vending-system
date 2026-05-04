@@ -20,7 +20,7 @@
         <div ref="pieRef" style="height: 300px;"></div>
       </el-card>
       <el-card class="chart-card">
-        <h4 class="mb-3">货柜销售排行</h4>
+        <h4 class="mb-3">货柜销售额排行</h4>
         <div ref="barRef" style="height: 300px;"></div>
       </el-card>
     </div>

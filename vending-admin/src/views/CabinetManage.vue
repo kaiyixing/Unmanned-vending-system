@@ -33,6 +33,9 @@
           <el-button text type="danger" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
+      <template #empty>
+        <el-empty description="暂无货柜数据" />
+      </template>
     </el-table>
 
     <el-pagination
@@ -198,20 +201,28 @@ onMounted(fetchData)
 
 <style scoped>
 .cabinet-manage { display: flex; flex-direction: column; gap: 16px; }
-.toolbar { display: flex; justify-content: space-between; align-items: center; }
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--admin-white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-clay);
+}
 
 .cabinet-uploader :deep(.el-upload) {
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
+  border: 1px dashed var(--admin-border);
+  border-radius: 12px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: var(--el-transition-duration-fast);
+  transition: all 0.3s;
   width: 100%;
 }
 
 .cabinet-uploader :deep(.el-upload:hover) {
-  border-color: var(--el-color-primary);
+  border-color: var(--admin-primary);
 }
 
 .cabinet-uploader-icon {
