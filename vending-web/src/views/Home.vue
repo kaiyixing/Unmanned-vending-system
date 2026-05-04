@@ -70,36 +70,21 @@
     </section>
 
     <!-- How It Works -->
-    <section class="section-padding" style="background-color: #e9f1fa;">
+    <section class="section-padding">
       <div class="container">
         <div class="text-center mb-5">
           <h2>购物流程</h2>
           <p class="lead text-muted">四步轻松完成购物</p>
         </div>
-        <div class="grid-4">
-          <div class="clay-box step-card">
-            <div class="step-num">1</div>
-            <div class="step-icon">📱</div>
-            <h4>登录注册</h4>
-            <p class="text-muted mb-0">使用账号登录或注册新账号</p>
-          </div>
-          <div class="clay-box step-card">
-            <div class="step-num">2</div>
-            <div class="step-icon">🏪</div>
-            <h4>选择货柜</h4>
-            <p class="text-muted mb-0">浏览附近货柜，选择商品加入购物车</p>
-          </div>
-          <div class="clay-box step-card">
-            <div class="step-num">3</div>
-            <div class="step-icon">💰</div>
-            <h4>在线支付</h4>
-            <p class="text-muted mb-0">使用微信或支付宝完成支付</p>
-          </div>
-          <div class="clay-box step-card">
-            <div class="step-num">4</div>
-            <div class="step-icon">📦</div>
-            <h4>取货码取货</h4>
-            <p class="text-muted mb-0">获取取货码，到指定货柜取货</p>
+        <div class="steps-container">
+          <div class="step-wrapper" v-for="(step, index) in steps" :key="index">
+            <div class="clay-box step-card">
+              <div class="step-num" :style="{ background: `linear-gradient(135deg, var(--color-secondary), var(--color-primary))` }">{{ step.num }}</div>
+              <div class="step-icon" :style="{ background: step.iconBg }">{{ step.icon }}</div>
+              <h4>{{ step.title }}</h4>
+              <p class="text-muted mb-0">{{ step.desc }}</p>
+            </div>
+            <div class="step-arrow" v-if="index < steps.length - 1">→</div>
           </div>
         </div>
       </div>
@@ -138,6 +123,13 @@ const cabinetsRef = ref()
 const selectedCity = ref('')
 const cities = ref(['深圳'])
 
+const steps = [
+  { num: 1, icon: '📱', iconBg: 'linear-gradient(135deg, #e3f2fd, #bbdefb)', title: '登录注册', desc: '使用账号登录或注册新账号' },
+  { num: 2, icon: '🏪', iconBg: 'linear-gradient(135deg, #fff3e0, #ffe0b2)', title: '选择货柜', desc: '浏览附近货柜，选择商品加入购物车' },
+  { num: 3, icon: '💰', iconBg: 'linear-gradient(135deg, #e8f5e9, #c8e6c9)', title: '在线支付', desc: '使用微信或支付宝完成支付' },
+  { num: 4, icon: '📦', iconBg: 'linear-gradient(135deg, #fce4ec, #f8bbd9)', title: '取货码取货', desc: '获取取货码，到指定货柜取货' }
+]
+
 async function fetchCabinets() {
   loading.value = true
   try {
@@ -174,6 +166,24 @@ onMounted(fetchCabinets)
 <style scoped>
 .city-selector {
   margin-bottom: 32px !important;
+}
+
+.city-selector select {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  border: none !important;
+  background-color: var(--color-background) !important;
+  transition: all 0.3s ease !important;
+}
+
+.city-selector select:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+.city-selector select:focus {
+  box-shadow: 0 0 0 3px rgba(162, 194, 232, 0.2) !important;
+  border-color: var(--color-primary) !important;
+  outline: none !important;
 }
 
 .hero-section {
@@ -255,36 +265,66 @@ onMounted(fetchCabinets)
 }
 
 .step-card {
-  padding: 32px 24px;
+  width: 180px;
+  padding: 24px 20px;
   text-align: center;
   position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: none;
+  border: 2px solid var(--color-border);
+}
+
+.step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-color: var(--color-primary);
 }
 
 .step-num {
   position: absolute;
   top: 12px;
   left: 12px;
-  width: 32px;
-  height: 32px;
-  background-color: var(--color-secondary);
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  color: #fff;
 }
 
 .step-icon {
-  width: 70px;
-  height: 70px;
-  margin: 0 auto 16px;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background-color: var(--color-white);
+  font-size: 1.8rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.steps-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.step-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.step-arrow {
+  font-size: 1.5rem;
   color: var(--color-primary);
+  opacity: 0.5;
+  padding: 0 8px;
 }
 
 .footer {

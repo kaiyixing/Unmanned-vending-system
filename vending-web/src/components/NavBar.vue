@@ -68,12 +68,15 @@ onUnmounted(() => {
   z-index: 1000;
   padding: 16px 0;
   transition: all 0.3s ease;
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .nav-header.scrolled {
   background-color: rgba(244, 241, 238, 0.95);
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   padding: 10px 0;
 }
 
