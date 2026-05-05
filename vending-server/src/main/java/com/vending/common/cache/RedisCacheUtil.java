@@ -3,9 +3,13 @@ package com.vending.common.cache;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -57,11 +61,22 @@ public class RedisCacheUtil {
     }
 
     /**
-     * 删除带前缀的所有缓存
+     * 删除带前缀的所有缓存（使用 SCAN 替代 KEYS，避免阻塞 Redis）
      */
     public void deleteByPrefix(String prefix) {
-        var keys = redisTemplate.keys(prefix + "*");
-        if (keys != null && !keys.isEmpty()) {
+        List<String> keys = new ArrayList<>();
+        ScanOptions options = ScanOptions.scanOptions()
+                .match(prefix + "*")
+                .count(100)
+                .build();
+
+        try (Cursor<String> cursor = redisTemplate.scan(options)) {
+            while (cursor.hasNext()) {
+                keys.add(cursor.next());
+            }
+        }
+
+        if (!keys.isEmpty()) {
             redisTemplate.delete(keys);
         }
     }

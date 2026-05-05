@@ -1,12 +1,16 @@
 package com.vending.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vending.common.cache.RedisCacheUtil;
+import com.vending.common.result.Result;
+import com.vending.common.result.ResultCode;
 import com.vending.common.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final RedisCacheUtil redisCacheUtil;
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -33,9 +38,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
             try {
+                // 先解析 token 获取 jti，再检查黑名单
+                String tokenId = jwtUtil.getTokenId(token);
+                
                 // 检查是否在黑名单
-                if (redisCacheUtil.exists(RedisCacheUtil.KEY_JWT_BLACKLIST + token)) {
-                    filterChain.doFilter(request, response);
+                if (redisCacheUtil.exists(RedisCacheUtil.KEY_JWT_BLACKLIST + tokenId)) {
+                    sendError(response, ResultCode.TOKEN_INVALID);
+                    return;
+                }
+
+                // 验证 token 类型必须是 access
+                String tokenType = jwtUtil.getTokenType(token);
+                if (!"access".equals(tokenType)) {
+                    sendError(response, ResultCode.TOKEN_INVALID);
                     return;
                 }
 
@@ -60,6 +75,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void sendError(HttpServletResponse response, ResultCode resultCode) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        
+        Result<Void> result = Result.fail(resultCode);
+        response.getWriter().write(objectMapper.writeValueAsString(result));
     }
 
     private String getRoleName(Integer role) {
