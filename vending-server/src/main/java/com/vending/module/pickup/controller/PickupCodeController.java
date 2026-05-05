@@ -22,7 +22,16 @@ public class PickupCodeController {
     private final OrderService orderService;
 
     @GetMapping("/{orderId}")
-    public Result<PickupCode> getByOrderId(@PathVariable Long orderId) {
+    public Result<PickupCode> getByOrderId(
+            @RequestAttribute("userId") Long userId,
+            @PathVariable Long orderId) {
+        Order order = orderService.getById(orderId);
+        if (order == null) {
+            throw new BusinessException(ResultCode.ORDER_NOT_FOUND);
+        }
+        if (!order.getUserId().equals(userId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权操作该订单");
+        }
         PickupCode pickupCode = pickupCodeService.lambdaQuery()
                 .eq(PickupCode::getOrderId, orderId)
                 .one();

@@ -103,6 +103,24 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         return "ORD" + System.currentTimeMillis() + String.format("%04d", (int)(Math.random() * 10000));
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void cancelOrder(Long userId, Long orderId) {
+        Order order = this.getById(orderId);
+        if (order == null) {
+            throw new BusinessException(ResultCode.ORDER_NOT_FOUND);
+        }
+        if (!order.getUserId().equals(userId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权操作该订单");
+        }
+        if (order.getStatus() != 0) {
+            throw new BusinessException(ResultCode.ORDER_STATUS_ERROR, "只有待支付订单可以取消");
+        }
+
+        order.setStatus(3);
+        this.updateById(order);
+    }
+
     private OrderVO convertToVO(Order order, List<OrderItem> items) {
         OrderVO vo = new OrderVO();
         vo.setOrderId(order.getOrderId());

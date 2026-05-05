@@ -39,21 +39,5 @@ public class RefundController {
         return Result.success(refundPage);
     }
 
-    @PostMapping("/admin/audit")
-    public Result<Void> auditRefund(@RequestBody Map<String, Object> request) {
-        Long refundId = Long.valueOf(request.get("refundId").toString());
-        Boolean approved = (Boolean) request.get("approved");
-        String remark = request.get("remark").toString();
-        refundService.auditRefund(refundId, approved, remark);
-        return Result.success();
-    }
 
-    @GetMapping("/admin/list")
-    public Result<Page<Refund>> getAllRefunds(
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "20") Integer size) {
-        Page<Refund> refundPage = new Page<>(page, size);
-        refundPage = refundService.page(refundPage);
-        return Result.success(refundPage);
-    }
 }
