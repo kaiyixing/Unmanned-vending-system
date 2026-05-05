@@ -3,9 +3,13 @@
 -- ========================================
 
 -- ========================================
+-- 说明：使用 INSERT IGNORE 实现幂等性
+-- ========================================
+
+-- ========================================
 -- 1. 批量插入商品数据
 -- ========================================
-INSERT INTO product (name, description, category, price, cost_price, spec, image_url, status, create_time, update_time) VALUES
+INSERT IGNORE INTO product (name, description, category, price, cost_price, spec, image_url, status, create_time, update_time) VALUES
 ('可口可乐', '经典口味330ml罐装', '饮料', 3.50, 1.80, '330ml/罐', 'https://placehold.co/400x400/ff6b6b/ffffff?text=Coca-Cola', 1, NOW(), NOW()),
 ('百事可乐', '经典口味330ml罐装', '饮料', 3.50, 1.80, '330ml/罐', 'https://placehold.co/400x400/3498db/ffffff?text=Pepsi', 1, NOW(), NOW()),
 ('农夫山泉', '天然矿泉水550ml', '饮料', 2.00, 0.90, '550ml/瓶', 'https://placehold.co/400x400/2ecc71/ffffff?text=MineralWater', 1, NOW(), NOW()),
@@ -40,7 +44,7 @@ INSERT INTO product (name, description, category, price, cost_price, spec, image
 -- ========================================
 -- 2. 批量插入货柜数据
 -- ========================================
-INSERT INTO cabinet (cabinet_code, name, city, address, image_url, latitude, longitude, capacity, status, create_time, update_time) VALUES
+INSERT IGNORE INTO cabinet (cabinet_code, name, city, address, image_url, latitude, longitude, capacity, status, create_time, update_time) VALUES
 ('CAB001', '科技园A栋1楼货柜', '深圳', '深圳市南山区科技园南路A栋1楼大厅', 'https://placehold.co/400x300/3498db/ffffff?text=Cabinet-A', 22.532908, 113.943106, 60, 1, NOW(), NOW()),
 ('CAB002', '科技园B栋2楼货柜', '深圳', '深圳市南山区科技园南路B栋2楼电梯口', 'https://placehold.co/400x300/2ecc71/ffffff?text=Cabinet-B', 22.533108, 113.944106, 50, 1, NOW(), NOW()),
 ('CAB003', '大学城图书馆货柜', '深圳', '深圳市南山区大学城图书馆一楼', 'https://placehold.co/400x300/9b59b6/ffffff?text=Cabinet-C', 22.590008, 113.970106, 50, 1, NOW(), NOW()),
@@ -53,10 +57,11 @@ INSERT INTO cabinet (cabinet_code, name, city, address, image_url, latitude, lon
 -- ========================================
 -- 3. 批量为每个货柜添加商品库存
 -- ========================================
--- 先获取货柜和商品的ID（假设商品ID从1开始，货柜ID从1开始）
+-- 使用INSERT IGNORE避免重复键错误
+-- ========================================
 
 -- 货柜1 (CAB001) - 全量商品
-INSERT INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
+INSERT IGNORE INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
 (1, 1, 50, 10), (1, 2, 45, 10), (1, 3, 80, 20), (1, 4, 40, 10),
 (1, 5, 30, 8), (1, 6, 25, 8), (1, 7, 20, 8), (1, 8, 20, 8),
 (1, 9, 18, 5), (1, 10, 15, 5), (1, 11, 10, 3), (1, 12, 35, 10),
@@ -67,14 +72,14 @@ INSERT INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
 (1, 29, 20, 5), (1, 30, 20, 5);
 
 -- 货柜2 (CAB002) - 精选商品
-INSERT INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
+INSERT IGNORE INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
 (2, 1, 40, 10), (2, 2, 35, 10), (2, 3, 70, 20), (2, 4, 30, 10),
 (2, 5, 25, 8), (2, 6, 20, 8), (2, 9, 15, 5), (2, 12, 28, 10),
 (2, 14, 25, 10), (2, 15, 22, 10), (2, 16, 35, 15), (2, 20, 25, 10),
 (2, 21, 30, 10), (2, 22, 35, 10), (2, 25, 25, 10);
 
 -- 货柜3 (CAB003) - 大学城热销品（饮料零食为主）
-INSERT INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
+INSERT IGNORE INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
 (3, 1, 60, 15), (3, 2, 55, 15), (3, 3, 100, 25), (3, 4, 50, 15),
 (3, 5, 40, 10), (3, 6, 30, 10), (3, 7, 30, 10), (3, 8, 30, 10),
 (3, 9, 25, 8), (3, 10, 20, 8), (3, 12, 40, 12), (3, 13, 25, 8),
@@ -82,7 +87,7 @@ INSERT INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
 (3, 20, 35, 12), (3, 21, 40, 12), (3, 22, 50, 15), (3, 25, 30, 10);
 
 -- 货柜4 (CAB004) - 购物广场热销
-INSERT INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
+INSERT IGNORE INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
 (4, 1, 35, 10), (4, 2, 30, 10), (4, 3, 60, 18), (4, 4, 28, 10),
 (4, 5, 22, 8), (4, 6, 18, 8), (4, 7, 18, 8), (4, 8, 18, 8),
 (4, 9, 15, 5), (4, 10, 12, 5), (4, 11, 8, 3), (4, 12, 25, 8),
@@ -90,7 +95,7 @@ INSERT INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
 (4, 19, 20, 8), (4, 20, 25, 10), (4, 21, 28, 10), (4, 25, 22, 8);
 
 -- 货柜5 (CAB005) - 全量商品
-INSERT INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
+INSERT IGNORE INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
 (5, 1, 45, 12), (5, 2, 42, 12), (5, 3, 75, 20), (5, 4, 38, 10),
 (5, 5, 28, 8), (5, 6, 22, 8), (5, 7, 22, 8), (5, 8, 22, 8),
 (5, 9, 18, 5), (5, 10, 15, 5), (5, 11, 10, 3), (5, 12, 32, 10),
@@ -101,7 +106,7 @@ INSERT INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
 (5, 29, 18, 5), (5, 30, 18, 5);
 
 -- 货柜6 (CAB006) - 华为基地热销
-INSERT INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
+INSERT IGNORE INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
 (6, 1, 55, 15), (6, 2, 50, 15), (6, 3, 90, 25), (6, 4, 45, 15),
 (6, 5, 40, 12), (6, 6, 30, 10), (6, 7, 30, 10), (6, 8, 30, 10),
 (6, 9, 22, 8), (6, 12, 40, 12), (6, 13, 25, 8), (6, 14, 32, 12),
@@ -109,14 +114,14 @@ INSERT INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
 (6, 22, 45, 15), (6, 25, 32, 12);
 
 -- 货柜7 (CAB007) - CBD商务区
-INSERT INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
+INSERT IGNORE INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
 (7, 1, 30, 10), (7, 2, 28, 10), (7, 3, 50, 15), (7, 4, 25, 8),
 (7, 5, 35, 10), (7, 6, 18, 6), (7, 9, 15, 5), (7, 10, 10, 3),
 (7, 11, 10, 3), (7, 12, 25, 8), (7, 13, 20, 5), (7, 19, 20, 8),
 (7, 20, 22, 8), (7, 21, 25, 8), (7, 22, 28, 10);
 
 -- 货柜8 (CAB008) - 火车站补货
-INSERT INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
+INSERT IGNORE INTO inventory (cabinet_id, product_id, quantity, threshold) VALUES
 (8, 1, 65, 20), (8, 2, 60, 20), (8, 3, 100, 30), (8, 4, 50, 15),
 (8, 5, 45, 15), (8, 6, 35, 12), (8, 7, 35, 12), (8, 8, 35, 12),
 (8, 9, 28, 10), (8, 10, 20, 8), (8, 11, 15, 5), (8, 12, 45, 15),
