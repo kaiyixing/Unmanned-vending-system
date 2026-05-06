@@ -6,6 +6,8 @@ import { refreshTokenApi } from './user'
 
 let isRefreshing = false
 let refreshSubscribers = []
+let isRedirecting = false
+let messageShown = false
 
 function subscribeTokenRefresh(callback) {
   refreshSubscribers.push(callback)
@@ -38,11 +40,10 @@ request.interceptors.response.use(
     if (res.code === 200) {
       return res
     } else {
-      ElMessage.error(res.message || '请求失败')
       if (res.code === 401) {
-        const userStore = useUserStore()
-        userStore.logout()
-        router.push('/login')
+        handleUnauthorized()
+      } else {
+        ElMessage.error(res.message || '请求失败')
       }
       return Promise.reject(new Error(res.message))
     }
@@ -65,9 +66,7 @@ request.interceptors.response.use(
 
       const refreshToken = localStorage.getItem('refreshToken')
       if (!refreshToken) {
-        const userStore = useUserStore()
-        userStore.logout()
-        router.push('/login')
+        handleUnauthorized()
         isRefreshing = false
         return Promise.reject(error)
       }
@@ -83,9 +82,7 @@ request.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newToken}`
         return request(originalRequest)
       } catch (refreshError) {
-        const userStore = useUserStore()
-        userStore.logout()
-        router.push('/login')
+        handleUnauthorized()
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false
@@ -93,12 +90,7 @@ request.interceptors.response.use(
     }
 
     if (error.response?.status === 401) {
-      const currentPath = window.location.pathname
-      if (currentPath !== '/login') {
-        const userStore = useUserStore()
-        userStore.logout()
-        router.push('/login')
-      }
+      handleUnauthorized()
     } else {
       const currentPath = window.location.pathname
       if (currentPath !== '/login' && !error.config._retry) {
@@ -108,5 +100,27 @@ request.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+function handleUnauthorized() {
+  const currentPath = window.location.pathname
+  if (currentPath === '/login') return
+
+  if (!isRedirecting) {
+    isRedirecting = true
+    if (!messageShown) {
+      messageShown = true
+      ElMessage.error('登录已过期，请重新登录')
+    }
+
+    const userStore = useUserStore()
+    userStore.logout()
+    router.push('/login')
+
+    setTimeout(() => {
+      isRedirecting = false
+      messageShown = false
+    }, 1000)
+  }
+}
 
 export default request
