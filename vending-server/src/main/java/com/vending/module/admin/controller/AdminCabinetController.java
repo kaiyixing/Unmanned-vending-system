@@ -1,6 +1,7 @@
 package com.vending.module.admin.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.vending.common.cache.RedisCacheUtil;
 import com.vending.common.result.Result;
 import com.vending.module.cabinet.entity.Cabinet;
 import com.vending.module.cabinet.service.CabinetService;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 public class AdminCabinetController {
 
     private final CabinetService cabinetService;
+    private final RedisCacheUtil redisCacheUtil;
 
     @GetMapping("/list")
     public Result<Page<Cabinet>> list(
@@ -50,18 +52,23 @@ public class AdminCabinetController {
     @PostMapping
     public Result<Void> save(@RequestBody Cabinet cabinet) {
         cabinetService.save(cabinet);
+        redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_CABINET_LIST);
         return Result.success();
     }
 
     @PutMapping
     public Result<Void> update(@RequestBody Cabinet cabinet) {
         cabinetService.updateById(cabinet);
+        redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_CABINET_LIST);
+        redisCacheUtil.delete(RedisCacheUtil.KEY_CABINET_PRODUCTS + cabinet.getCabinetId());
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         cabinetService.removeById(id);
+        redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_CABINET_LIST);
+        redisCacheUtil.delete(RedisCacheUtil.KEY_CABINET_PRODUCTS + id);
         return Result.success();
     }
 }
