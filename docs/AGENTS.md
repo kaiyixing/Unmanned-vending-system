@@ -34,13 +34,55 @@ cd vending-web && npm run dev
 cd vending-admin && npm run dev
 ```
 
+## 环境变量配置
+
+项目支持通过环境变量配置敏感信息，避免硬编码：
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|--------|
+| `SERVER_PORT` | 后端服务端口 | 8080 |
+| `DB_URL` | 数据库连接 URL | `jdbc:mysql://localhost:3306/vending_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true` |
+| `DB_USERNAME` | 数据库用户名 | vending |
+| `DB_PASSWORD` | 数据库密码 | vending1234 |
+| `REDIS_HOST` | Redis 主机 | localhost |
+| `REDIS_PORT` | Redis 端口 | 6379 |
+| `REDIS_DATABASE` | Redis 数据库 | 0 |
+| `JWT_SECRET` | JWT 密钥 | `vending-system-secret-key-2026-must-be-at-least-256-bits` |
+| `JWT_EXPIRATION` | JWT 过期时间（毫秒） | 7200000 |
+| `MINIO_ENDPOINT` | MinIO 地址 | `http://localhost:9000` |
+| `MINIO_ACCESS_KEY` | MinIO 访问密钥 | minioadmin |
+| `MINIO_SECRET_KEY` | MinIO 密钥 | minioadmin1234 |
+| `MINIO_BUCKET` | MinIO 存储桶 | vending-images |
+| `LOG_LEVEL` | 日志级别 | info |
+| `SECURITY_LOG_LEVEL` | 安全日志级别 | info |
+
+### 使用环境变量（Windows）
+```powershell
+# 临时设置
+$env:DB_PASSWORD="your_secure_password"
+$env:JWT_SECRET="your_secure_jwt_secret"
+
+# 然后启动服务
+mvn spring-boot:run
+```
+
+### 使用环境变量（Linux/Mac）
+```bash
+# 临时设置
+export DB_PASSWORD="your_secure_password"
+export JWT_SECRET="your_secure_jwt_secret"
+
+# 然后启动服务
+mvn spring-boot:run
+```
+
 ## 测试账号
 
 | 角色 | 用户名 | 密码 |
 |------|--------|------|
 | 超级管理员 | admin | 123456 |
 | 运营管理员 | operator1 | 123456 |
-| 普通用户 | user001 | 123456 |
+| 普通用户 | test01 | 123456 |
 
 ## 核心实现
 
@@ -52,19 +94,27 @@ cd vending-admin && npm run dev
   - JWT黑名单机制：支持主动注销Token
   - Token刷新接口：`/api/user/refresh`
   - `role` 存数字(0/1/2)，映射在 `JwtAuthenticationFilter.getRoleName()`
+- **权限控制**：
+  - `/api/admin/**` → ADMIN/SUPER_ADMIN
+  - `/api/inventory/**` → ADMIN/SUPER_ADMIN
+  - `/api/refund/admin/**` → ADMIN/SUPER_ADMIN
+  - `/api/user/list` → ADMIN/SUPER_ADMIN
 - **Redis缓存**：
   - 商品列表缓存：`cache:product:list:`
   - 货柜列表缓存：`cache:cabinet:list:`
   - 货柜商品缓存：`cache:cabinet:products:`
   - JWT黑名单：`jwt:blacklist:`
   - Refresh Token存储：`jwt:refresh:`
-- **并发**：Redis SETNX 分布式锁 + MySQL 乐观锁
+  - 缓存清除优化：使用 SCAN 替代 KEYS，分批删除避免阻塞
+- **并发控制**：Redis SETNX 分布式锁（10秒超时）+ MySQL 乐观锁（库存扣减和回滚都有锁保护）
 
 ## 前端要点
 
 - 路由使用 `createWebHashHistory()`（Hash 模式，URL 带 `#`）
-- 登录后用 `window.location.href = '/#/'` 跳转
-- API 在 `src/api/request.js`，直接读 localStorage 的 token
+- 登录后使用 Pinia 统一管理状态
+- API 在 `src/api/request.js`，统一管理 Token 刷新和错误处理
+- 支持自动刷新 Token：Access Token 过期时自动使用 Refresh Token 刷新
+- 前端 API 基础地址：`import.meta.env.VITE_API_BASE_URL || '/api'`
 
 ## 数据库
 
@@ -81,4 +131,5 @@ DDL 在 `vending-server/sql/schema.sql`。
 ## 参考文档
 
 - `开发文档.md` — 代码示例、DDL、部署
-- `无人售货系统-完整报告.md` — 学术报告
+- `数据层本地部署指南.md` — 数据库、Redis、MinIO 部署
+- `无人售货系统-完整报告.md` — 项目完整报告
