@@ -163,6 +163,11 @@ mvn spring-boot:run
 
 后端服务将在 http://localhost:8080 启动
 
+启动后可以访问以下 API 文档地址：
+- **Swagger UI（推荐）**：http://localhost:8080/swagger-ui.html
+- **Swagger UI（详细地址）**：http://localhost:8080/swagger-ui/index.html
+- **OpenAPI 3.0 JSON**：http://localhost:8080/v3/api-docs
+
 ### 5. 用户端启动
 
 ```bash

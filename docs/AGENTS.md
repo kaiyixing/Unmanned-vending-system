@@ -34,6 +34,19 @@ cd vending-web && npm run dev
 cd vending-admin && npm run dev
 ```
 
+启动后可以访问以下地址：
+- **后端服务**：http://localhost:8080
+- **Swagger UI（API文档）**：http://localhost:8080/swagger-ui.html 或 http://localhost:8080/swagger-ui/index.html
+- **OpenAPI 3.0 JSON**：http://localhost:8080/v3/api-docs
+- **用户端**：http://localhost:5173
+- **管理后台**：http://localhost:5174
+
+Swagger UI 使用说明：
+1. 打开 http://localhost:8080/swagger-ui.html
+2. 点击右上角 "Authorize" 按钮
+3. 输入 `Bearer {access_token}` 格式的 JWT Token（先通过登录接口获取）
+4. 即可测试需要认证的接口
+
 ## 环境变量配置
 
 项目支持通过环境变量配置敏感信息，避免硬编码：
