@@ -1,7 +1,26 @@
 <template>
   <div class="cabinet-manage">
     <div class="toolbar">
-      <el-input v-model="searchCity" placeholder="搜索城市" clearable style="width: 200px" @keyup.enter="fetchData" />
+      <div class="toolbar-left">
+        <el-select
+          v-model="searchCity"
+          placeholder="选择或搜索城市"
+          clearable
+          filterable
+          style="width: 250px"
+          @change="fetchData"
+          @clear="fetchData"
+        >
+          <el-option
+            v-for="city in cityOptions"
+            :key="city"
+            :label="city"
+            :value="city"
+          />
+        </el-select>
+        <el-button type="primary" @click="fetchData">搜索</el-button>
+        <el-button @click="resetSearch">重置</el-button>
+      </div>
       <div class="toolbar-right">
         <el-button type="primary" @click="openDialog()">新增货柜</el-button>
       </div>
@@ -94,7 +113,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import { adminCabinetList, adminCabinetSave, adminCabinetUpdate, adminCabinetDelete } from '@/api/cabinet'
+import { adminCabinetList, adminCabinetGetCities, adminCabinetSave, adminCabinetUpdate, adminCabinetDelete } from '@/api/cabinet'
 import { uploadImage, uploadImageWithPrefix } from '@/api/pickup'
 
 const loading = ref(false)
@@ -105,6 +124,7 @@ const page = ref(1)
 const size = ref(20)
 const total = ref(0)
 const searchCity = ref('')
+const cityOptions = ref([])
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 
@@ -149,6 +169,13 @@ async function handleUpload(options) {
   }
 }
 
+async function fetchCities() {
+  try {
+    const res = await adminCabinetGetCities()
+    cityOptions.value = res.data || []
+  } catch (e) {}
+}
+
 async function fetchData() {
   loading.value = true
   try {
@@ -161,6 +188,12 @@ async function fetchData() {
   } finally {
     loading.value = false
   }
+}
+
+function resetSearch() {
+  searchCity.value = ''
+  page.value = 1
+  fetchData()
 }
 
 function openDialog(row) {
@@ -196,7 +229,10 @@ async function handleDelete(row) {
   } catch (e) {}
 }
 
-onMounted(fetchData)
+onMounted(() => {
+  fetchData()
+  fetchCities()
+})
 </script>
 
 <style scoped>
@@ -209,6 +245,12 @@ onMounted(fetchData)
   background: var(--admin-white);
   border-radius: 16px;
   box-shadow: var(--shadow-clay);
+}
+
+.toolbar-left {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .cabinet-uploader :deep(.el-upload) {

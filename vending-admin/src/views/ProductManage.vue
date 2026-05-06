@@ -1,7 +1,12 @@
 <template>
   <div class="product-manage">
     <div class="toolbar">
-      <el-input v-model="searchCategory" placeholder="搜索分类" clearable style="width: 200px" @keyup.enter="fetchData" />
+      <div class="toolbar-left">
+        <el-input v-model="searchName" placeholder="搜索商品名称" clearable style="width: 200px" @keyup.enter="fetchData" />
+        <el-input v-model="searchCategory" placeholder="搜索分类" clearable style="width: 200px" @keyup.enter="fetchData" />
+        <el-button type="primary" @click="fetchData">搜索</el-button>
+        <el-button @click="resetSearch">重置</el-button>
+      </div>
       <div class="toolbar-right">
         <el-button type="primary" @click="openDialog()">新增商品</el-button>
       </div>
@@ -116,6 +121,7 @@ const tableData = ref([])
 const page = ref(1)
 const size = ref(20)
 const total = ref(0)
+const searchName = ref('')
 const searchCategory = ref('')
 const dialogVisible = ref(false)
 const isEdit = ref(false)
@@ -136,6 +142,7 @@ async function fetchData() {
   loading.value = true
   try {
     const params = { page: page.value, size: size.value }
+    if (searchName.value) params.name = searchName.value
     if (searchCategory.value) params.category = searchCategory.value
     const res = await adminProductList(params)
     tableData.value = res.data.records || []
@@ -144,6 +151,13 @@ async function fetchData() {
   } finally {
     loading.value = false
   }
+}
+
+function resetSearch() {
+  searchName.value = ''
+  searchCategory.value = ''
+  page.value = 1
+  fetchData()
 }
 
 function openDialog(row) {
@@ -224,6 +238,12 @@ onMounted(fetchData)
   background: var(--admin-white);
   border-radius: 16px;
   box-shadow: var(--shadow-clay);
+}
+
+.toolbar-left {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .cabinet-uploader :deep(.el-upload) {

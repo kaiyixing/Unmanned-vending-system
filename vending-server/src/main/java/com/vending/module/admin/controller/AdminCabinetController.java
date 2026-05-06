@@ -7,6 +7,9 @@ import com.vending.module.cabinet.service.CabinetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/admin/cabinet")
 @RequiredArgsConstructor
@@ -20,14 +23,22 @@ public class AdminCabinetController {
             @RequestParam(defaultValue = "20") Integer size,
             @RequestParam(required = false) String city) {
         Page<Cabinet> cabinetPage = new Page<>(page, size);
-        if (city != null && !city.isEmpty()) {
-            cabinetPage = cabinetService.lambdaQuery()
-                    .eq(Cabinet::getCity, city)
-                    .page(cabinetPage);
-        } else {
-            cabinetPage = cabinetService.page(cabinetPage);
-        }
+        cabinetPage = cabinetService.lambdaQuery()
+                .eq(city != null && !city.isEmpty(), Cabinet::getCity, city)
+                .page(cabinetPage);
         return Result.success(cabinetPage);
+    }
+
+    @GetMapping("/cities")
+    public Result<List<String>> getCities() {
+        List<Cabinet> cabinets = cabinetService.list();
+        List<String> cities = cabinets.stream()
+                .map(Cabinet::getCity)
+                .distinct()
+                .filter(city -> city != null && !city.isEmpty())
+                .sorted()
+                .collect(Collectors.toList());
+        return Result.success(cities);
     }
 
     @GetMapping("/{id}")

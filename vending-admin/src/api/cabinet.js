@@ -4,6 +4,10 @@ export function adminCabinetList(params) {
   return request.get('/admin/cabinet/list', { params })
 }
 
+export function adminCabinetGetCities() {
+  return request.get('/admin/cabinet/cities')
+}
+
 export function adminCabinetGetById(id) {
   return request.get(`/admin/cabinet/${id}`)
 }

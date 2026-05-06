@@ -62,6 +62,7 @@ public class ProductController {
     public Result<Void> save(@Valid @RequestBody Product product) {
         productService.save(product);
         redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_PRODUCT_LIST);
+        redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_CABINET_PRODUCTS);
         return Result.success();
     }
 
@@ -70,6 +71,7 @@ public class ProductController {
     public Result<Void> update(@Valid @RequestBody Product product) {
         productService.updateById(product);
         redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_PRODUCT_LIST);
+        redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_CABINET_PRODUCTS);
         return Result.success();
     }
 
@@ -78,6 +80,7 @@ public class ProductController {
     public Result<Void> delete(@PathVariable Long id) {
         productService.removeById(id);
         redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_PRODUCT_LIST);
+        redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_CABINET_PRODUCTS);
         return Result.success();
     }
 }
