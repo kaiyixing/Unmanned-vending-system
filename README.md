@@ -161,7 +161,7 @@ cd vending-server
 mvn spring-boot:run
 ```
 
-后端服务将在 http://localhost:9000 启动
+后端服务将在 http://localhost:8080 启动
 
 ### 5. 用户端启动
 

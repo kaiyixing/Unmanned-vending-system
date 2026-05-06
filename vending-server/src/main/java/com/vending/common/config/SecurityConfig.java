@@ -55,7 +55,10 @@ public class SecurityConfig {
                     "/api/cabinet/*/products",
                     "/api/product/**",
                     "/api/upload",
-                    "/error"
+                    "/error",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**"
                 ).permitAll()
                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/api/inventory/**").hasAnyRole("ADMIN", "SUPER_ADMIN")

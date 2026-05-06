@@ -7,6 +7,7 @@ import com.vending.common.result.Result;
 import com.vending.common.result.ResultCode;
 import com.vending.module.product.entity.Product;
 import com.vending.module.product.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +59,7 @@ public class ProductController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    public Result<Void> save(@RequestBody Product product) {
+    public Result<Void> save(@Valid @RequestBody Product product) {
         productService.save(product);
         redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_PRODUCT_LIST);
         return Result.success();
@@ -66,7 +67,7 @@ public class ProductController {
 
     @PutMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    public Result<Void> update(@RequestBody Product product) {
+    public Result<Void> update(@Valid @RequestBody Product product) {
         productService.updateById(product);
         redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_PRODUCT_LIST);
         return Result.success();
