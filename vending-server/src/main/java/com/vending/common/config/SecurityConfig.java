@@ -48,7 +48,6 @@ public class SecurityConfig {
                     "/api/user/login",
                     "/api/user/register",
                     "/api/user/refresh",
-                    "/api/user/list",
                     "/api/public/**",
                     "/api/cabinet/list",
                     "/api/cabinet/*/products",
@@ -57,6 +56,9 @@ public class SecurityConfig {
                     "/error"
                 ).permitAll()
                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/api/inventory/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/api/refund/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/api/user/list").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

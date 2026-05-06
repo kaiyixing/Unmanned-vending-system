@@ -71,7 +71,19 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                         .eq(OrderItem::getOrderId, orderId));
 
         for (OrderItem item : items) {
-            this.getBaseMapper().addStock(cabinetId, item.getProductId(), item.getQuantity());
+            String lockKey = INVENTORY_LOCK_KEY + cabinetId + ":" + item.getProductId();
+
+            Boolean locked = redisTemplate.opsForValue()
+                    .setIfAbsent(lockKey, "1", 10, TimeUnit.SECONDS);
+            if (Boolean.FALSE.equals(locked)) {
+                throw new BusinessException(ResultCode.INVENTORY_ERROR, "库存操作繁忙，请稍后重试");
+            }
+
+            try {
+                this.getBaseMapper().addStock(cabinetId, item.getProductId(), item.getQuantity());
+            } finally {
+                redisTemplate.delete(lockKey);
+            }
         }
     }
 }
