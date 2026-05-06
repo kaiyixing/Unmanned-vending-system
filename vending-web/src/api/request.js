@@ -17,7 +17,7 @@ function onTokenRefreshed(newToken) {
 }
 
 const request = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   timeout: 10000
 })
 
@@ -52,7 +52,6 @@ request.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        // 正在刷新 Token，将请求加入队列
         return new Promise(resolve => {
           subscribeTokenRefresh(newToken => {
             originalRequest.headers.Authorization = `Bearer ${newToken}`
@@ -93,7 +92,19 @@ request.interceptors.response.use(
       }
     }
 
-    ElMessage.error(error.message || '网络错误')
+    if (error.response?.status === 401) {
+      const currentPath = window.location.pathname
+      if (currentPath !== '/login') {
+        const userStore = useUserStore()
+        userStore.logout()
+        router.push('/login')
+      }
+    } else {
+      const currentPath = window.location.pathname
+      if (currentPath !== '/login' && !error.config._retry) {
+        ElMessage.error(error.message || '网络错误')
+      }
+    }
     return Promise.reject(error)
   }
 )

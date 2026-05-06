@@ -61,18 +61,22 @@ public class RedisCacheUtil {
     }
 
     /**
-     * 删除带前缀的所有缓存（使用 SCAN 替代 KEYS，避免阻塞 Redis）
+     * 删除带前缀的所有缓存（使用 SCAN 替代 KEYS，分批删除避免 Redis 阻塞）
      */
     public void deleteByPrefix(String prefix) {
         List<String> keys = new ArrayList<>();
         ScanOptions options = ScanOptions.scanOptions()
                 .match(prefix + "*")
-                .count(100)
+                .count(500)
                 .build();
 
         try (Cursor<String> cursor = redisTemplate.scan(options)) {
             while (cursor.hasNext()) {
                 keys.add(cursor.next());
+                if (keys.size() >= 100) {
+                    redisTemplate.delete(keys);
+                    keys.clear();
+                }
             }
         }
 

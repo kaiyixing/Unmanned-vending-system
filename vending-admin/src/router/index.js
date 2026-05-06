@@ -24,7 +24,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('adminToken')
+  const token = localStorage.getItem('adminAccessToken') || localStorage.getItem('adminToken')
   if (to.path !== '/login' && !token) {
     next('/login')
   } else if (to.path === '/login' && token) {

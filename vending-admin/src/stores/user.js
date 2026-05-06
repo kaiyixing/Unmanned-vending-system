@@ -1,13 +1,24 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { logoutApi } from '@/api/user'
+
+let isLoggingOut = false
 
 export const useUserStore = defineStore('adminUser', () => {
-  const token = ref(localStorage.getItem('adminToken') || '')
+  const accessToken = ref(localStorage.getItem('adminAccessToken') || '')
+  const refreshToken = ref(localStorage.getItem('adminRefreshToken') || '')
   const userInfo = ref(JSON.parse(localStorage.getItem('adminUserInfo') || '{}'))
 
-  function setToken(t) {
-    token.value = t
-    localStorage.setItem('adminToken', t)
+  const token = accessToken
+
+  function setAccessToken(newToken) {
+    accessToken.value = newToken
+    localStorage.setItem('adminAccessToken', newToken)
+  }
+
+  function setRefreshToken(newToken) {
+    refreshToken.value = newToken
+    localStorage.setItem('adminRefreshToken', newToken)
   }
 
   function setUserInfo(info) {
@@ -15,12 +26,30 @@ export const useUserStore = defineStore('adminUser', () => {
     localStorage.setItem('adminUserInfo', JSON.stringify(info))
   }
 
-  function logout() {
-    token.value = ''
+  function clearLocalState() {
+    accessToken.value = ''
+    refreshToken.value = ''
     userInfo.value = {}
-    localStorage.removeItem('adminToken')
+    localStorage.removeItem('adminAccessToken')
+    localStorage.removeItem('adminRefreshToken')
     localStorage.removeItem('adminUserInfo')
   }
 
-  return { token, userInfo, setToken, setUserInfo, logout }
+  async function logout() {
+    if (isLoggingOut) return
+    isLoggingOut = true
+    try {
+      await logoutApi({ refreshToken: refreshToken.value })
+    } catch (e) {
+    } finally {
+      clearLocalState()
+      isLoggingOut = false
+    }
+  }
+
+  function forceLogout() {
+    clearLocalState()
+  }
+
+  return { accessToken, refreshToken, token, userInfo, setAccessToken, setRefreshToken, setUserInfo, logout, forceLogout }
 })

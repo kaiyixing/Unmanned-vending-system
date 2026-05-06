@@ -60,7 +60,8 @@ async function handleLogin() {
       ElMessage.error('无权访问管理后台')
       return
     }
-    userStore.setToken(res.data.token)
+    userStore.setAccessToken(res.data.accessToken || res.data.token)
+    userStore.setRefreshToken(res.data.refreshToken)
     userStore.setUserInfo(res.data)
     ElMessage.success('登录成功')
     window.location.href = '/'

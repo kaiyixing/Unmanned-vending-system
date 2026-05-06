@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    password: vending1234
+  data:
+    redis:
+      host: localhost
+
+jwt:
+  secret: vending-system-secret-key-2026-must-be-at-least-256-bits
+
+minio:
+  access-key: minioadmin
+  secret-key: minioadmin1234
+
+logging:
+  level:
+    com.vending: debug
+    org.springframework.security: debug

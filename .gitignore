@@ -29,5 +29,11 @@ Thumbs.db
 # Docker
 volumes/
 
+# Local env files
+.env
+.env.*
+!.env.*.example
+application-local.yml
+
 # Trae IDE
 .trae/

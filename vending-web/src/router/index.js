@@ -17,11 +17,16 @@ const router = createRouter({
   routes
 })
 
+function hasValidToken() {
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token')
+  return token && token.length > 0
+}
+
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
-  if (to.path !== '/login' && !token) {
+  const hasToken = hasValidToken()
+  if (to.path !== '/login' && !hasToken) {
     next('/login')
-  } else if (to.path === '/login' && token) {
+  } else if (to.path === '/login' && hasToken) {
     next('/')
   } else {
     next()

@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, markRaw } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import { ShoppingBag, Wallet, TrendCharts, Box } from '@element-plus/icons-vue'
@@ -50,10 +50,10 @@ const barRef = ref()
 const topProducts = ref([])
 
 const stats = ref([
-  { label: '总订单数', value: '-', icon: ShoppingBag, color: '#A2C2E8', type: 'all' },
-  { label: '今日订单', value: '-', icon: TrendCharts, color: '#FFCBA4', type: 'today' },
-  { label: '总销售额', value: '-', icon: Wallet, color: '#BEE8D2', type: 'all' },
-  { label: '今日销售', value: '-', icon: Box, color: '#d4e5f7', type: 'today' }
+  { label: '总订单数', value: '-', icon: markRaw(ShoppingBag), color: '#A2C2E8', type: 'all' },
+  { label: '今日订单', value: '-', icon: markRaw(TrendCharts), color: '#FFCBA4', type: 'today' },
+  { label: '总销售额', value: '-', icon: markRaw(Wallet), color: '#BEE8D2', type: 'all' },
+  { label: '今日销售', value: '-', icon: markRaw(Box), color: '#d4e5f7', type: 'today' }
 ])
 
 async function fetchData() {

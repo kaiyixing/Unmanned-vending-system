@@ -5,11 +5,13 @@ import com.vending.common.cache.RedisCacheUtil;
 import com.vending.common.result.Result;
 import com.vending.common.result.ResultCode;
 import com.vending.common.util.JwtUtil;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -69,8 +72,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 request.setAttribute("userId", userId);
                 request.setAttribute("role", role);
+            } catch (JwtException e) {
+                log.debug("Invalid JWT token: {}", e.getMessage());
             } catch (Exception e) {
-                // Token 无效，不设置认证信息，由 Spring Security 处理未授权
+                log.error("Unexpected error during JWT authentication", e);
             }
         }
 

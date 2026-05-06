@@ -2,10 +2,13 @@ package com.vending.module.product.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vending.common.cache.RedisCacheUtil;
+import com.vending.common.exception.BusinessException;
 import com.vending.common.result.Result;
+import com.vending.common.result.ResultCode;
 import com.vending.module.product.entity.Product;
 import com.vending.module.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.TimeUnit;
@@ -54,6 +57,7 @@ public class ProductController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public Result<Void> save(@RequestBody Product product) {
         productService.save(product);
         redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_PRODUCT_LIST);
@@ -61,6 +65,7 @@ public class ProductController {
     }
 
     @PutMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public Result<Void> update(@RequestBody Product product) {
         productService.updateById(product);
         redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_PRODUCT_LIST);
@@ -68,6 +73,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public Result<Void> delete(@PathVariable Long id) {
         productService.removeById(id);
         redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_PRODUCT_LIST);
