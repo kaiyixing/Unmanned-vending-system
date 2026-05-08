@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user")
@@ -83,8 +84,20 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public Result<List<User>> list() {
-        List<User> users = userService.list();
+    public Result<List<UserVO>> list() {
+        List<UserVO> users = userService.list().stream()
+                .map(user -> {
+                    UserVO vo = new UserVO();
+                    vo.setUserId(user.getUserId());
+                    vo.setUsername(user.getUsername());
+                    vo.setPhone(user.getPhone());
+                    vo.setEmail(user.getEmail());
+                    vo.setRealName(user.getRealName());
+                    vo.setAvatar(user.getAvatar());
+                    vo.setRole(user.getRole());
+                    return vo;
+                })
+                .collect(java.util.stream.Collectors.toList());
         return Result.success(users);
     }
 }
