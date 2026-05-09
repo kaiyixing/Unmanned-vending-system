@@ -195,8 +195,8 @@ class DistributedLockConcurrencyTest extends BaseTest {
                     startLatch.await();
 
                     CreateOrderRequest request = new CreateOrderRequest();
-                    request.setCabinetId(testCabinetId);
-                    CreateOrderRequest.ItemDTO item = new CreateOrderRequest.ItemDTO();
+        request.setCabinetId(testCabinetId);
+        CreateOrderRequest.OrderItemDTO item = new CreateOrderRequest.OrderItemDTO();
                     item.setProductId(testProductId);
                     item.setQuantity(quantityPerThread);
                     request.setItems(Collections.singletonList(item));

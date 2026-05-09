@@ -134,7 +134,7 @@ class TransactionConsistencyTest extends BaseTest {
 
         CreateOrderRequest request = new CreateOrderRequest();
         request.setCabinetId(testCabinetId);
-        CreateOrderRequest.ItemDTO item = new CreateOrderRequest.ItemDTO();
+        CreateOrderRequest.OrderItemDTO item = new CreateOrderRequest.OrderItemDTO();
         item.setProductId(testProductId);
         item.setQuantity(5);
         request.setItems(Collections.singletonList(item));
@@ -193,7 +193,7 @@ class TransactionConsistencyTest extends BaseTest {
 
                     CreateOrderRequest request = new CreateOrderRequest();
                     request.setCabinetId(testCabinetId);
-                    CreateOrderRequest.ItemDTO item = new CreateOrderRequest.ItemDTO();
+                    CreateOrderRequest.OrderItemDTO item = new CreateOrderRequest.OrderItemDTO();
                     item.setProductId(testProductId);
                     item.setQuantity(quantityPerThread);
                     request.setItems(Collections.singletonList(item));
@@ -241,11 +241,11 @@ class TransactionConsistencyTest extends BaseTest {
         CreateOrderRequest request = new CreateOrderRequest();
         request.setCabinetId(testCabinetId);
 
-        CreateOrderRequest.ItemDTO item1 = new CreateOrderRequest.ItemDTO();
+        CreateOrderRequest.OrderItemDTO item1 = new CreateOrderRequest.OrderItemDTO();
         item1.setProductId(testProductId);
         item1.setQuantity(3);
 
-        CreateOrderRequest.ItemDTO item2 = new CreateOrderRequest.ItemDTO();
+        CreateOrderRequest.OrderItemDTO item2 = new CreateOrderRequest.OrderItemDTO();
         item2.setProductId(testProductId);
         item2.setQuantity(2);
 

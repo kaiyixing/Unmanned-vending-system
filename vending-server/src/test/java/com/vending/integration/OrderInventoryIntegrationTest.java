@@ -126,7 +126,7 @@ class OrderInventoryIntegrationTest extends BaseTest {
 
         CreateOrderRequest request = new CreateOrderRequest();
         request.setCabinetId(testCabinetId);
-        CreateOrderRequest.ItemDTO item = new CreateOrderRequest.ItemDTO();
+        CreateOrderRequest.OrderItemDTO item = new CreateOrderRequest.OrderItemDTO();
         item.setProductId(testProductId);
         item.setQuantity(2);
         request.setItems(Collections.singletonList(item));
@@ -164,7 +164,7 @@ class OrderInventoryIntegrationTest extends BaseTest {
 
         CreateOrderRequest request = new CreateOrderRequest();
         request.setCabinetId(testCabinetId);
-        CreateOrderRequest.ItemDTO item = new CreateOrderRequest.ItemDTO();
+        CreateOrderRequest.OrderItemDTO item = new CreateOrderRequest.OrderItemDTO();
         item.setProductId(testProductId);
         item.setQuantity(3);
         request.setItems(Collections.singletonList(item));
@@ -192,7 +192,7 @@ class OrderInventoryIntegrationTest extends BaseTest {
         List<PickupCode> pickupCodes = pickupCodeMapper.selectList(
                 new LambdaQueryWrapper<PickupCode>().eq(PickupCode::getOrderId, orderVO.getOrderId()));
         assertEquals(1, pickupCodes.size());
-        assertNotNull(pickupCodes.get(0).getPickupCode());
+        assertNotNull(pickupCodes.get(0).getCodeValue());
 
         log.info("✅ 订单支付流程测试通过");
     }
@@ -206,7 +206,7 @@ class OrderInventoryIntegrationTest extends BaseTest {
 
         CreateOrderRequest request = new CreateOrderRequest();
         request.setCabinetId(testCabinetId);
-        CreateOrderRequest.ItemDTO item = new CreateOrderRequest.ItemDTO();
+        CreateOrderRequest.OrderItemDTO item = new CreateOrderRequest.OrderItemDTO();
         item.setProductId(testProductId);
         item.setQuantity(initialStock + 1);
         request.setItems(Collections.singletonList(item));
@@ -240,7 +240,7 @@ class OrderInventoryIntegrationTest extends BaseTest {
 
         CreateOrderRequest request = new CreateOrderRequest();
         request.setCabinetId(testCabinetId);
-        CreateOrderRequest.ItemDTO item = new CreateOrderRequest.ItemDTO();
+        CreateOrderRequest.OrderItemDTO item = new CreateOrderRequest.OrderItemDTO();
         item.setProductId(testProductId);
         item.setQuantity(1);
         request.setItems(Collections.singletonList(item));
