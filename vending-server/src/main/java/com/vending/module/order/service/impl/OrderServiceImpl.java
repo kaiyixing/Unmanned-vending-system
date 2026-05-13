@@ -47,10 +47,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 throw new BusinessException(ResultCode.PRODUCT_OFF_SHELF);
             }
 
-            if (!inventoryService.checkStock(request.getCabinetId(), itemDTO.getProductId(), itemDTO.getQuantity())) {
-                throw new BusinessException(ResultCode.INSUFFICIENT_STOCK);
-            }
-
             OrderItem orderItem = new OrderItem();
             orderItem.setProductId(product.getProductId());
             orderItem.setProductName(product.getName());
@@ -74,6 +70,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderItems.forEach(item -> item.setOrderId(order.getOrderId()));
         orderItems.forEach(item -> orderItemMapper.insert(item));
 
+        inventoryService.deductStock(request.getCabinetId(), order.getOrderId());
+
         return convertToVO(order, orderItems);
     }
 
@@ -87,8 +85,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (order.getStatus() != 0) {
             throw new BusinessException(ResultCode.ORDER_STATUS_ERROR);
         }
-
-        inventoryService.deductStock(order.getCabinetId(), orderId);
 
         order.setStatus(1);
         order.setPayTime(LocalDateTime.now());

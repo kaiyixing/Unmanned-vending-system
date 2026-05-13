@@ -62,12 +62,20 @@ public class RefundServiceImpl extends ServiceImpl<RefundMapper, Refund> impleme
             throw new BusinessException(ResultCode.NOT_FOUND, "退款申请不存在");
         }
 
+        if (refund.getStatus() != 0) {
+            throw new BusinessException(ResultCode.ORDER_STATUS_ERROR, "退款申请状态异常");
+        }
+
+        Order order = orderService.getById(refund.getOrderId());
+        if (order == null) {
+            throw new BusinessException(ResultCode.ORDER_NOT_FOUND);
+        }
+
         if (approved) {
             refund.setStatus(3);
             refund.setAuditRemark(remark);
             this.updateById(refund);
 
-            Order order = orderService.getById(refund.getOrderId());
             order.setStatus(5);
             orderService.updateById(order);
 
@@ -77,7 +85,6 @@ public class RefundServiceImpl extends ServiceImpl<RefundMapper, Refund> impleme
             refund.setAuditRemark(remark);
             this.updateById(refund);
 
-            Order order = orderService.getById(refund.getOrderId());
             order.setStatus(1);
             orderService.updateById(order);
         }

@@ -1,6 +1,8 @@
 package com.vending.module.pickup.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.vending.common.exception.BusinessException;
+import com.vending.common.result.ResultCode;
 import com.vending.module.order.entity.Order;
 import com.vending.module.pickup.entity.PickupCode;
 import com.vending.module.pickup.mapper.PickupCodeMapper;
@@ -16,6 +18,7 @@ import java.util.Random;
 public class PickupCodeServiceImpl extends ServiceImpl<PickupCodeMapper, PickupCode> implements PickupCodeService {
 
     private final Random random = new Random();
+    private static final int MAX_RETRY_COUNT = 100;
 
     @Override
     public void generatePickupCode(Order order) {
@@ -30,13 +33,16 @@ public class PickupCodeServiceImpl extends ServiceImpl<PickupCodeMapper, PickupC
     }
 
     private String generateCode() {
-        int code = 100000 + random.nextInt(900000);
-        String codeStr = String.valueOf(code);
-
-        while (this.lambdaQuery().eq(PickupCode::getCodeValue, codeStr).exists()) {
-            code = 100000 + random.nextInt(900000);
-            codeStr = String.valueOf(code);
+        int retryCount = 0;
+        while (retryCount < MAX_RETRY_COUNT) {
+            int code = 100000 + random.nextInt(900000);
+            String codeStr = String.valueOf(code);
+            
+            if (!this.lambdaQuery().eq(PickupCode::getCodeValue, codeStr).exists()) {
+                return codeStr;
+            }
+            retryCount++;
         }
-        return codeStr;
+        throw new BusinessException(ResultCode.PAYMENT_FAILED, "取货码生成失败，请重试");
     }
 }
