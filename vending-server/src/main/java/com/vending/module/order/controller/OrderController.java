@@ -27,9 +27,10 @@ public class OrderController {
 
     @PostMapping("/pay/{orderId}")
     public Result<Void> payOrder(
+            @RequestAttribute("userId") Long userId,
             @PathVariable Long orderId,
             @RequestParam(defaultValue = "mock") String payChannel) {
-        orderService.payOrder(orderId, payChannel);
+        orderService.payOrder(userId, orderId, payChannel);
         return Result.success();
     }
 
@@ -47,8 +48,13 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public Result<Order> getById(@PathVariable Long id) {
+    public Result<Order> getById(
+            @RequestAttribute("userId") Long userId,
+            @PathVariable Long id) {
         Order order = orderService.getById(id);
+        if (order == null || !order.getUserId().equals(userId)) {
+            return Result.fail(404, "订单不存在");
+        }
         return Result.success(order);
     }
 }

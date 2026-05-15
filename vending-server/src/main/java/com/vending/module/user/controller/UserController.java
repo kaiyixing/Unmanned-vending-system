@@ -83,8 +83,15 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public Result<List<User>> list() {
+    public Result<List<UserVO>> list() {
         List<User> users = userService.list();
-        return Result.success(users);
+        List<UserVO> userVOs = users.stream().map(user -> {
+            UserVO vo = new UserVO();
+            vo.setUserId(user.getUserId());
+            vo.setUsername(user.getUsername());
+            vo.setRole(user.getRole());
+            return vo;
+        }).toList();
+        return Result.success(userVOs);
     }
 }
