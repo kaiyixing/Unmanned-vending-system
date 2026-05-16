@@ -79,10 +79,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void payOrder(Long orderId, String payChannel) {
+    public void payOrder(Long userId, Long orderId, String payChannel) {
         Order order = this.getById(orderId);
         if (order == null) {
             throw new BusinessException(ResultCode.ORDER_NOT_FOUND);
+        }
+        if (!order.getUserId().equals(userId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权操作该订单");
         }
         if (order.getStatus() != 0) {
             throw new BusinessException(ResultCode.ORDER_STATUS_ERROR);

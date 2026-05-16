@@ -8,6 +8,7 @@ import com.vending.module.order.service.OrderService;
 import com.vending.module.pickup.entity.PickupCode;
 import com.vending.module.pickup.service.PickupCodeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,13 @@ public class PickupCodeController {
     private final OrderService orderService;
 
     @GetMapping("/{orderId}")
-    public Result<PickupCode> getByOrderId(@PathVariable Long orderId) {
+    public Result<PickupCode> getByOrderId(
+            @RequestAttribute("userId") Long userId,
+            @PathVariable Long orderId) {
+        Order order = orderService.getById(orderId);
+        if (order == null || !order.getUserId().equals(userId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权查看该取货码");
+        }
         PickupCode pickupCode = pickupCodeService.lambdaQuery()
                 .eq(PickupCode::getOrderId, orderId)
                 .one();
@@ -30,6 +37,7 @@ public class PickupCodeController {
     }
 
     @PostMapping("/verify")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> verifyPickupCode(@RequestParam String codeValue) {
         PickupCode pickupCode = pickupCodeService.lambdaQuery()
@@ -54,12 +62,10 @@ public class PickupCodeController {
             throw new BusinessException(ResultCode.PICKUP_CODE_EXPIRED);
         }
 
-        // 更新取货码状态
         pickupCode.setStatus(1);
         pickupCode.setUseTime(LocalDateTime.now());
         pickupCodeService.updateById(pickupCode);
 
-        // 更新订单状态为已完成
         Order order = orderService.getById(pickupCode.getOrderId());
         if (order != null && order.getStatus() == 1) {
             order.setStatus(2);

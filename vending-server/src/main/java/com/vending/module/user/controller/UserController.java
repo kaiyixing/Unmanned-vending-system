@@ -10,11 +10,13 @@ import com.vending.module.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user")
@@ -83,8 +85,20 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public Result<List<User>> list() {
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    public Result<List<UserVO>> list() {
         List<User> users = userService.list();
-        return Result.success(users);
+        List<UserVO> userVOs = users.stream().map(user -> {
+            UserVO vo = new UserVO();
+            vo.setUserId(user.getUserId());
+            vo.setUsername(user.getUsername());
+            vo.setPhone(user.getPhone());
+            vo.setEmail(user.getEmail());
+            vo.setRealName(user.getRealName());
+            vo.setAvatar(user.getAvatar());
+            vo.setRole(user.getRole());
+            return vo;
+        }).collect(Collectors.toList());
+        return Result.success(userVOs);
     }
 }

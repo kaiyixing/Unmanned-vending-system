@@ -7,5 +7,5 @@ import com.vending.module.order.entity.Order;
 
 public interface OrderService extends IService<Order> {
     OrderVO createOrder(Long userId, CreateOrderRequest request);
-    void payOrder(Long orderId, String payChannel);
+    void payOrder(Long userId, Long orderId, String payChannel);
 }

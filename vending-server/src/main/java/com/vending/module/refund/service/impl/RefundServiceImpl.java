@@ -62,24 +62,31 @@ public class RefundServiceImpl extends ServiceImpl<RefundMapper, Refund> impleme
             throw new BusinessException(ResultCode.NOT_FOUND, "退款申请不存在");
         }
 
-        if (approved) {
-            refund.setStatus(3);
-            refund.setAuditRemark(remark);
-            this.updateById(refund);
+        if (refund.getStatus() != 0) {
+            throw new BusinessException(ResultCode.ORDER_STATUS_ERROR, "该退款申请已审核，请勿重复操作");
+        }
 
-            Order order = orderService.getById(refund.getOrderId());
+        Order order = orderService.getById(refund.getOrderId());
+        if (order == null) {
+            throw new BusinessException(ResultCode.ORDER_NOT_FOUND, "关联订单不存在");
+        }
+
+        if (approved) {
+            inventoryService.rollbackStock(order.getCabinetId(), order.getOrderId());
+
             order.setStatus(5);
             orderService.updateById(order);
 
-            inventoryService.rollbackStock(order.getCabinetId(), order.getOrderId());
+            refund.setStatus(3);
+            refund.setAuditRemark(remark);
+            this.updateById(refund);
         } else {
+            order.setStatus(1);
+            orderService.updateById(order);
+
             refund.setStatus(2);
             refund.setAuditRemark(remark);
             this.updateById(refund);
-
-            Order order = orderService.getById(refund.getOrderId());
-            order.setStatus(1);
-            orderService.updateById(order);
         }
     }
 }

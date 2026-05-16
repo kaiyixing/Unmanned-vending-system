@@ -6,6 +6,7 @@ import com.vending.common.result.Result;
 import com.vending.module.cabinet.entity.Cabinet;
 import com.vending.module.cabinet.service.CabinetService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -68,6 +69,7 @@ public class CabinetController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public Result<Void> save(@RequestBody Cabinet cabinet) {
         cabinetService.save(cabinet);
         redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_CABINET_LIST);
@@ -75,6 +77,7 @@ public class CabinetController {
     }
 
     @PutMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public Result<Void> update(@RequestBody Cabinet cabinet) {
         cabinetService.updateById(cabinet);
         redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_CABINET_LIST);
@@ -83,6 +86,7 @@ public class CabinetController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public Result<Void> delete(@PathVariable Long id) {
         cabinetService.removeById(id);
         redisCacheUtil.deleteByPrefix(RedisCacheUtil.KEY_CABINET_LIST);

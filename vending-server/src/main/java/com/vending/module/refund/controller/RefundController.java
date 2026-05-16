@@ -5,6 +5,7 @@ import com.vending.common.result.Result;
 import com.vending.module.refund.entity.Refund;
 import com.vending.module.refund.service.RefundService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -40,6 +41,7 @@ public class RefundController {
     }
 
     @PostMapping("/admin/audit")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public Result<Void> auditRefund(@RequestBody Map<String, Object> request) {
         Long refundId = Long.valueOf(request.get("refundId").toString());
         Boolean approved = (Boolean) request.get("approved");
@@ -49,6 +51,7 @@ public class RefundController {
     }
 
     @GetMapping("/admin/list")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public Result<Page<Refund>> getAllRefunds(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "20") Integer size) {

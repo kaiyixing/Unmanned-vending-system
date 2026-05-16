@@ -54,7 +54,6 @@ public class SecurityConfig {
                     "/api/cabinet/list",
                     "/api/cabinet/*/products",
                     "/api/product/**",
-                    "/api/upload",
                     "/error",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
